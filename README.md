@@ -15,9 +15,10 @@ EVKey-style interface.
 
 ## Why verify before you trust a build
 
-**Only run CatKey builds you can verify.** This project deliberately
-forbids obfuscated/packed binaries and requires independent verification
-before distribution (see [`LICENSE`](LICENSE)).
+**Only run CatKey builds you can verify.** As a community guideline (not a
+license term — CatKey is GPLv3, which permits any distribution including
+commercial), we strongly discourage obfuscated/packed binaries and ask that
+builds be independently verifiable before they are shared.
 
 Here is why this matters. UniKey is the best-known Vietnamese IME. Its
 **official** website is **unikey.org**. A separate site, **unikey.vn**,
@@ -26,8 +27,8 @@ builds bundled with unwanted/possibly-malicious software, without a valid
 digital signature. Because an input method sees every keystroke you type,
 a tampered build is extremely dangerous.
 
-CatKey's rule: a distributed build must come from published source, be
-reproducible, ship checksums, and be reproduced by at least one
+CatKey's guideline: a shared build should come from published source, be
+reproducible, ship checksums, and ideally be reproduced by at least one
 independent party before it is offered for download. If a CatKey download
 is packed, unsigned, or you can't match its checksum to a reproducible
 build from source — **do not run it.**
@@ -79,7 +80,14 @@ requirements in [`LICENSE`](LICENSE) and the notes in [`docs/`](docs/).
 
 ## License
 
-CatKey is licensed under **CC BY-NC-SA 4.0** with additional terms
-(no commercial sale, no obfuscated/packed redistribution, verify before
-distributing). See [`LICENSE`](LICENSE) and
-[`CC-BY-NC-SA LICENSE`](CC-BY-NC-SA%20LICENSE).
+CatKey is licensed under the **GNU General Public License v3 (or later)**.
+See [`LICENSE`](LICENSE).
+
+**Why GPLv3:** CatKey includes code reverse-engineered from EVKey, which is
+based on **UniKey**. UniKey is released under the GPL, so CatKey — as a
+derivative work — must also be GPL. (See the note in `LICENSE`.) This also
+means CatKey's source must always stay available; please keep builds
+reproducible and ship source alongside any binary you share.
+
+**Trust note:** because an input method sees everything you type, only run
+builds you can verify from source. See the verification guidance above.

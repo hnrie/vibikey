@@ -14,10 +14,11 @@ Bộ gõ tiếng Việt miễn phí, mã nguồn mở, với giao diện giống
 
 ## Vì sao phải kiểm chứng bản build trước khi tin dùng
 
-**Chỉ chạy những bản CatKey mà bạn có thể kiểm chứng.** Dự án này cố ý
-cấm phát hành bản nhị phân bị làm rối (obfuscated) hoặc bị nén/đóng gói
-(packed), và bắt buộc phải được kiểm chứng độc lập trước khi phân phối
-(xem [`../LICENSE`](../LICENSE)).
+**Chỉ chạy những bản CatKey mà bạn có thể kiểm chứng.** Đây là khuyến nghị
+của cộng đồng (không phải điều khoản giấy phép — CatKey dùng GPLv3, cho phép
+mọi hình thức phân phối kể cả thương mại): chúng tôi khuyến cáo không phát
+hành bản nhị phân bị làm rối (obfuscated) hoặc bị nén/đóng gói (packed), và
+mong bản build có thể được kiểm chứng độc lập trước khi chia sẻ.
 
 Lý do: UniKey là bộ gõ tiếng Việt nổi tiếng nhất. Trang **chính thức**
 là **unikey.org**. Một trang khác, **unikey.vn**, *không* phải là dự án
@@ -26,11 +27,11 @@ mềm không mong muốn / có thể chứa mã độc, và **không có chữ k
 lệ**. Vì bộ gõ nhìn thấy mọi phím bạn nhấn, một bản bị chỉnh sửa là cực
 kỳ nguy hiểm.
 
-Quy tắc của CatKey: mọi bản phát hành phải đến từ mã nguồn đã công bố,
-build lại được (reproducible), kèm mã băm (checksum), và được ít nhất một
-bên độc lập build lại để đối chiếu trước khi cho tải về. Nếu một bản
-CatKey bị đóng gói/nén, không có chữ ký, hoặc bạn không đối chiếu được mã
-băm với bản build từ mã nguồn — **đừng chạy nó.**
+Khuyến nghị của CatKey: bản chia sẻ nên đến từ mã nguồn đã công bố, build
+lại được (reproducible), kèm mã băm (checksum), và tốt nhất là được ít
+nhất một bên độc lập build lại để đối chiếu trước khi cho tải về. Nếu một
+bản CatKey bị đóng gói/nén, không có chữ ký, hoặc bạn không đối chiếu được
+mã băm với bản build từ mã nguồn — **đừng chạy nó.**
 
 ---
 
@@ -73,7 +74,11 @@ chứng trong [`../LICENSE`](../LICENSE).
 
 ## Giấy phép
 
-CatKey dùng giấy phép **CC BY-NC-SA 4.0** kèm điều khoản bổ sung (không
-bán thương mại, không phát hành bản bị làm rối/nén, phải kiểm chứng trước
-khi phân phối). Xem [`../LICENSE`](../LICENSE) và
-[`../CC-BY-NC-SA LICENSE`](../CC-BY-NC-SA%20LICENSE).
+CatKey được cấp phép theo **Giấy phép Công cộng GNU phiên bản 3 (GPLv3)**
+hoặc phiên bản mới hơn. Xem [`../LICENSE`](../LICENSE).
+
+**Tại sao là GPLv3:** CatKey chứa mã đảo ngược từ EVKey, vốn dựa trên
+**UniKey**. UniKey phát hành dưới GPL, nên CatKey — với tư cách là tác phẩm
+phái sinh — cũng phải dùng GPL. (Xem ghi chú trong `LICENSE`.) Điều này
+cũng có nghĩa mã nguồn CatKey luôn phải công khai; hãy giữ bản build có thể
+tái tạo và đi kèm mã nguồn khi chia sẻ.
