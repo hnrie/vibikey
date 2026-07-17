@@ -70,9 +70,58 @@ static const char *Y_[3][6] = {
     {"y","\u00fd","\u1ef3","\u1ef7","\u1ef9","\u1ef5"},
 };
 
-static const char *vowel_utf8(char base, int variant, int tone) {
+/* Uppercase precomposed tables, same [variant][tone] layout. */
+/* A Â Ă */
+static const char *AU_[3][6] = {
+    {"A","\u00c1","\u00c0","\u1ea2","\u00c3","\u1ea0"},
+    {"\u00c2","\u1ea4","\u1ea6","\u1ea8","\u1eaa","\u1eac"},
+    {"\u0102","\u1eae","\u1eb0","\u1eb2","\u1eb4","\u1eb6"},
+};
+/* E Ê */
+static const char *EU_[3][6] = {
+    {"E","\u00c9","\u00c8","\u1eba","\u1ebc","\u1eb8"},
+    {"\u00ca","\u1ebe","\u1ec0","\u1ec2","\u1ec4","\u1ec6"},
+    {"E","\u00c9","\u00c8","\u1eba","\u1ebc","\u1eb8"},
+};
+/* I */
+static const char *IU_[3][6] = {
+    {"I","\u00cd","\u00cc","\u1ec8","\u0128","\u1eca"},
+    {"I","\u00cd","\u00cc","\u1ec8","\u0128","\u1eca"},
+    {"I","\u00cd","\u00cc","\u1ec8","\u0128","\u1eca"},
+};
+/* O Ô Ơ */
+static const char *OU_[3][6] = {
+    {"O","\u00d3","\u00d2","\u1ece","\u00d5","\u1ecc"},
+    {"\u00d4","\u1ed0","\u1ed2","\u1ed4","\u1ed6","\u1ed8"},
+    {"\u01a0","\u1eda","\u1edc","\u1ede","\u1ee0","\u1ee2"},
+};
+/* U Ư */
+static const char *UU_[3][6] = {
+    {"U","\u00da","\u00d9","\u1ee6","\u0168","\u1ee4"},
+    {"U","\u00da","\u00d9","\u1ee6","\u0168","\u1ee4"},
+    {"\u01af","\u1ee8","\u1eea","\u1eec","\u1eee","\u1ef0"},
+};
+/* Y */
+static const char *YU_[3][6] = {
+    {"Y","\u00dd","\u1ef2","\u1ef6","\u1ef8","\u1ef4"},
+    {"Y","\u00dd","\u1ef2","\u1ef6","\u1ef8","\u1ef4"},
+    {"Y","\u00dd","\u1ef2","\u1ef6","\u1ef8","\u1ef4"},
+};
+
+static const char *vowel_utf8(char base, int variant, int tone, int upper) {
     if (variant < 0 || variant > 2) variant = 0;
     if (tone < 0 || tone > 5) tone = 0;
+    if (upper) {
+        switch (base) {
+            case 'a': return AU_[variant][tone];
+            case 'e': return EU_[variant][tone];
+            case 'i': return IU_[variant][tone];
+            case 'o': return OU_[variant][tone];
+            case 'u': return UU_[variant][tone];
+            case 'y': return YU_[variant][tone];
+            default:  return NULL;
+        }
+    }
     switch (base) {
         case 'a': return A_[variant][tone];
         case 'e': return E_[variant][tone];
@@ -115,8 +164,8 @@ static int emit_letters(Letter *ls, int n, char *out, int max) {
         if (ls[i].is_dstroke) {
             s = ls[i].upper ? "\u0110" : "\u0111"; /* Đ / đ */
         } else if (ls[i].is_vowel) {
-            s = vowel_utf8(ls[i].c, ls[i].variant, ls[i].tone);
-            if (!s) { tmp[0] = ls[i].c; tmp[1] = 0; s = tmp; }
+            s = vowel_utf8(ls[i].c, ls[i].variant, ls[i].tone, ls[i].upper);
+            if (!s) { tmp[0] = ls[i].upper ? (char)toupper((unsigned char)ls[i].c) : ls[i].c; tmp[1] = 0; s = tmp; }
         } else {
             tmp[0] = ls[i].upper ? (char)toupper((unsigned char)ls[i].c) : ls[i].c;
             tmp[1] = 0;
@@ -124,9 +173,6 @@ static int emit_letters(Letter *ls, int n, char *out, int max) {
         }
         int L = (int)strlen(s);
         if (p + L >= max - 1) break;
-        /* Uppercase for precomposed vowels: only handle ASCII-safe fallback.
-         * For simplicity keep vowel caps as lowercase glyph if uppercase var
-         * not tabled (temporary). */
         memcpy(out + p, s, L);
         p += L;
     }
@@ -319,9 +365,10 @@ int catkey_modifier_pressed(int vk_code) { (void)vk_code; return 0; }
 #ifdef CATKEY_TEST
 #include <stdio.h>
 int main(void) {
-    const char *tests[] = {"dd","aa","chaof","vieejt","tieengs","ddaa","as","af","tieng1"};
+    const char *tests[] = {"dd","aa","chaof","vieejt","tieengs","ddaa","as","af",
+                           "Ee","Aa","Ow","Uwx","DDaay","TIEENGS"};
     char o[MAX_OUTPUT_LENGTH];
-    for (int i=0;i<9;i++){ catkey_convert_word(tests[i],o,sizeof o,CATKEY_TEIP); printf("%s -> %s\n",tests[i],o);}    
+    for (int i=0;i<14;i++){ catkey_convert_word(tests[i],o,sizeof o,CATKEY_TEIP); printf("%s -> %s\n",tests[i],o);}    
     return 0;
 }
 #endif

@@ -1,0 +1,79 @@
+# CatKey
+
+Bộ gõ tiếng Việt miễn phí, mã nguồn mở, với giao diện giống EVKey.
+
+- **Giao diện (UI/UX):** Python + PySide6
+- **Lõi (chuyển đổi + hook bàn phím toàn hệ thống):** C
+- **Kiểu gõ:** Telex và VNI (theo từ, đặt dấu đúng vị trí, hỗ trợ đầy đủ
+  chữ hoa: Ê, Ô, Ơ, Ă, Đ, ...)
+- **Ngôn ngữ:** English / Tiếng Việt (chuyển đổi ngay trong ứng dụng)
+
+> English: see [`../README.md`](../README.md).
+
+---
+
+## Vì sao phải kiểm chứng bản build trước khi tin dùng
+
+**Chỉ chạy những bản CatKey mà bạn có thể kiểm chứng.** Dự án này cố ý
+cấm phát hành bản nhị phân bị làm rối (obfuscated) hoặc bị nén/đóng gói
+(packed), và bắt buộc phải được kiểm chứng độc lập trước khi phân phối
+(xem [`../LICENSE`](../LICENSE)).
+
+Lý do: UniKey là bộ gõ tiếng Việt nổi tiếng nhất. Trang **chính thức**
+là **unikey.org**. Một trang khác, **unikey.vn**, *không* phải là dự án
+chính thức và đã bị phản ánh là phát hành các bản UniKey kèm theo phần
+mềm không mong muốn / có thể chứa mã độc, và **không có chữ ký số hợp
+lệ**. Vì bộ gõ nhìn thấy mọi phím bạn nhấn, một bản bị chỉnh sửa là cực
+kỳ nguy hiểm.
+
+Quy tắc của CatKey: mọi bản phát hành phải đến từ mã nguồn đã công bố,
+build lại được (reproducible), kèm mã băm (checksum), và được ít nhất một
+bên độc lập build lại để đối chiếu trước khi cho tải về. Nếu một bản
+CatKey bị đóng gói/nén, không có chữ ký, hoặc bạn không đối chiếu được mã
+băm với bản build từ mã nguồn — **đừng chạy nó.**
+
+---
+
+## Bắt đầu nhanh (từ mã nguồn)
+
+Yêu cầu: Python 3.11+, trình biên dịch C (MSVC hoặc GCC/Clang).
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install PySide6-Essentials pynput
+python run_ui.py
+```
+
+Lõi C (`catkey_core.dll` / `libcatkey_core.so`) sẽ được tự động build
+trong lần chạy đầu tiên nếu có trình biên dịch.
+
+## Tính năng
+
+- Gõ tiếng Việt trên toàn hệ thống (Notepad, trình duyệt, chat, ...).
+- Biểu tượng khay: nhấp trái để bật/tắt tiếng Việt; nhấp đúp để mở cài đặt.
+- Phím tắt bật/tắt toàn cục (mặc định `Ctrl+Shift`).
+- Phát hiện xung đột với bộ gõ khác (UniKey/EVKey/OpenKey/...).
+- Chống chạy nhiều bản (tránh gõ bị nhân đôi).
+
+## Tạo bản phân phối
+
+```powershell
+.\build.ps1 -Tool pyinstaller
+.\build.ps1 -Tool nuitka -OneFile
+```
+
+```bash
+./build.sh --tool pyinstaller
+./build.sh --tool nuitka --onefile
+```
+
+Nếu định chia sẻ bản build cho người khác, hãy tuân theo yêu cầu kiểm
+chứng trong [`../LICENSE`](../LICENSE).
+
+## Giấy phép
+
+CatKey dùng giấy phép **CC BY-NC-SA 4.0** kèm điều khoản bổ sung (không
+bán thương mại, không phát hành bản bị làm rối/nén, phải kiểm chứng trước
+khi phân phối). Xem [`../LICENSE`](../LICENSE) và
+[`../CC-BY-NC-SA LICENSE`](../CC-BY-NC-SA%20LICENSE).

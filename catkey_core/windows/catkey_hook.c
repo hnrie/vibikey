@@ -229,12 +229,15 @@ static LRESULT CALLBACK ll_proc(int nCode, WPARAM wParam, LPARAM lParam) {
         return CallNextHookEx(g_hook, nCode, wParam, lParam);
     }
 
-    /* Map VK to an ASCII character (letters + digits + a few marks). */
+    /* Map VK to an ASCII character (letters + digits + a few marks).
+     * Letter case = Shift XOR CapsLock (CapsLock only affects letters). */
     char ch = 0;
-    int sh = shift ? 1 : 0;
+    int caps = (GetKeyState(VK_CAPITAL) & 1) ? 1 : 0;
     if (vk >= 'A' && vk <= 'Z') {
-        ch = (char)(sh ? vk : (vk | 0x20));
+        int upper = (shift ? 1 : 0) ^ caps;
+        ch = (char)(upper ? vk : (vk | 0x20));
     } else if (vk >= '0' && vk <= '9') {
+        int sh = shift ? 1 : 0;
         if (sh) { reset_word(); return CallNextHookEx(g_hook, nCode, wParam, lParam); }
         ch = (char)vk;
     } else {
