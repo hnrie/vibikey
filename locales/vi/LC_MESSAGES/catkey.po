@@ -1,0 +1,195 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: CatKey 1.0.0\n"
+"Language: vi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Window / buttons
+msgid "CatKey - Vietnamese Keyboard"
+msgstr "CatKey - Bàn phím Tiếng Việt"
+
+msgid "Tiếng Việt"
+msgstr "English"
+
+msgid "Defaults"
+msgstr "Mặc định"
+
+msgid "Apply"
+msgstr "Áp dụng"
+
+msgid "Hide"
+msgstr "Ẩn"
+
+msgid "Close"
+msgstr "Đóng"
+
+# Tabs
+msgid "General"
+msgstr "Chung"
+
+msgid "Options"
+msgstr "Tùy chọn"
+
+msgid "Shortkeys"
+msgstr "Phím tắt"
+
+msgid "Macro"
+msgstr "Macro"
+
+msgid "Exceptions"
+msgstr "Ngoại lệ"
+
+msgid "About"
+msgstr "Giới thiệu"
+
+# General tab
+msgid "Vietnamese Input"
+msgstr "Gõ Tiếng Việt"
+
+msgid "Input method:"
+msgstr "Kiểu gõ:"
+
+msgid "Character set:"
+msgstr "Bảng mã:"
+
+msgid "Spelling"
+msgstr "Chính tả"
+
+msgid "Check basic spelling"
+msgstr "Kiểm tra chính tả cơ bản"
+
+msgid "Change back to original word on spelling mistake"
+msgstr "Khôi phục từ gốc khi gõ sai chính tả"
+
+msgid "Allow f, w, j, z as Vietnamese consonants in spelling check"
+msgstr "Cho phép f, w, j, z là phụ âm Tiếng Việt"
+
+msgid "Free marking tone (behind the vowel or end of word)"
+msgstr "Đặt dấu tự do (sau nguyên âm hoặc cuối từ)"
+
+msgid "Auto Upper Case after \"Enter . ! ?\""
+msgstr "Tự động viết hoa sau \"Enter . ! ?\""
+
+# Options tab
+msgid "Compatibility"
+msgstr "Tương thích"
+
+msgid "Modern style"
+msgstr "Kiểu hiện đại"
+
+msgid "Use standard key sending"
+msgstr "Dùng cách gửi phím chuẩn"
+
+msgid "Use Clipboard for send key"
+msgstr "Dùng Clipboard để gửi phím"
+
+msgid "Support Metro apps (Mail, Facebook, Messenger)"
+msgstr "Hỗ trợ ứng dụng Metro (Mail, Facebook, Messenger)"
+
+msgid "Correct Vietnamese on browser address bar / Excel"
+msgstr "Sửa Tiếng Việt trên thanh địa chỉ trình duyệt / Excel"
+
+msgid "System"
+msgstr "Hệ thống"
+
+msgid "Auto-run CatKey at boot time"
+msgstr "Tự khởi động CatKey cùng máy"
+
+msgid "Run as Administrator on startup"
+msgstr "Chạy với quyền Administrator"
+
+msgid "Show this dialog box at startup"
+msgstr "Hiện cửa sổ này khi khởi động"
+
+msgid "Turn on/off notification sounds"
+msgstr "Bật/tắt âm thanh thông báo"
+
+msgid "Auto check for update at boot time"
+msgstr "Tự kiểm tra cập nhật khi khởi động"
+
+msgid "Customize Tray icon"
+msgstr "Tùy chỉnh biểu tượng khay"
+
+# Shortkeys tab
+msgid "Switch English / Vietnamese:"
+msgstr "Chuyển Anh / Việt:"
+
+msgid "Restore original word:"
+msgstr "Khôi phục từ gốc:"
+
+msgid "Reset keyboard state:"
+msgstr "Đặt lại bàn phím:"
+
+# Macro tab
+msgid "Enable macros"
+msgstr "Bật macro"
+
+msgid "Allow macros even if Vietnamese is off"
+msgstr "Cho phép macro ngay cả khi tắt Tiếng Việt"
+
+msgid "Macro file:"
+msgstr "Tập tin macro:"
+
+msgid "Select..."
+msgstr "Chọn..."
+
+msgid "Macro Table..."
+msgstr "Bảng macro..."
+
+# Exceptions tab
+msgid "Use exceptional applications list to prevent Vietnamese typing in those apps."
+msgstr "Dùng danh sách ứng dụng ngoại lệ để chặn gõ Tiếng Việt trong các ứng dụng đó."
+
+msgid "Add..."
+msgstr "Thêm..."
+
+msgid "Remove"
+msgstr "Xóa"
+
+msgid "Auto prevent Vietnamese typing"
+msgstr "Tự động chặn gõ Tiếng Việt"
+
+# Tray
+msgid "Input method"
+msgstr "Kiểu gõ"
+
+msgid "Character set"
+msgstr "Bảng mã"
+
+msgid "Convert Tool...  (F6)"
+msgstr "Công cụ chuyển mã...  (F6)"
+
+msgid "Macro Table...  (F8)"
+msgstr "Bảng macro...  (F8)"
+
+msgid "On/Off Macro  (F9)"
+msgstr "Bật/Tắt Macro  (F9)"
+
+msgid "Show CatKey dialog"
+msgstr "Hiện cửa sổ CatKey"
+
+msgid "Exit"
+msgstr "Thoát"
+
+msgid "Vietnamese"
+msgstr "Tiếng Việt"
+
+msgid "English"
+msgstr "Tiếng Anh"
+
+msgid "Vietnamese (On)"
+msgstr "Tiếng Việt (Bật)"
+
+msgid "English (Off)"
+msgstr "Tiếng Anh (Tắt)"
+
+msgid "Vietnamese typing ON"
+msgstr "Đã BẬT gõ Tiếng Việt"
+
+msgid "Vietnamese typing OFF"
+msgstr "Đã TẮT gõ Tiếng Việt"
+
+msgid "Notify when Vietnamese typing is turned on or off"
+msgstr "Thông báo khi bật/tắt gõ Tiếng Việt"

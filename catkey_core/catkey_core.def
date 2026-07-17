@@ -1,0 +1,12 @@
+LIBRARY catkey_core
+EXPORTS
+    catkey_process_input
+    catkey_convert_word
+    catkey_modifier_pressed
+    catkey_start
+    catkey_stop
+    catkey_set_enabled
+    catkey_get_enabled
+    catkey_set_method
+    catkey_set_toggle_key
+    catkey_is_running
