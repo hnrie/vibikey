@@ -55,8 +55,10 @@ Remove-Artifacts
 $Stage = Join-Path $env:TEMP "catkey_core_stage"
 if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
 New-Item -ItemType Directory -Path $Stage | Out-Null
-Get-ChildItem $CoreDir -File | Where-Object { $_.Extension -in '.dll', '.so', '.dylib' } |
-    Copy-Item -Destination $Stage
+$libs = Get-ChildItem $CoreDir -File | Where-Object { $_.Extension -in '.dll', '.so', '.dylib' }
+if (-not $libs) { throw "No native libraries (*.dll/*.so/*.dylib) found in $CoreDir to bundle." }
+$libs | Copy-Item -Destination $Stage
+Write-Host "Staged native libs: $(($libs | ForEach-Object Name) -join ', ')" -ForegroundColor Cyan
 
 if ($Tool -eq 'pyinstaller') {
     & $Python -m pip install --quiet --upgrade pyinstaller
@@ -79,12 +81,16 @@ else {
         '--enable-plugin=pyside6',
         '--windows-console-mode=disable',
         "--output-filename=$Name.exe",
-        "--include-data-dir=$Stage=catkey_core",
         "--include-data-dir=$Locales=locales",
         '--assume-yes-for-downloads',
-        "--output-dir=$(Join-Path $Root 'dist')",
-        $Entry
+        "--output-dir=$(Join-Path $Root 'dist')"
     )
+    # Nuitka's --include-data-dir skips *.dll; force each native lib in as a
+    # data file so ctypes can load it at runtime (no compiler on user's box).
+    foreach ($lib in $libs) {
+        $args += "--include-data-files=$($lib.FullName)=catkey_core/$($lib.Name)"
+    }
+    $args += $Entry
     & $Python @args
     $out = $OneFile ? (Join-Path $Root "dist\$Name.exe") : (Join-Path $Root "dist\run_ui.dist\$Name.exe")
 }

@@ -72,11 +72,17 @@ if [ "$TOOL" = "pyinstaller" ]; then
 elif [ "$TOOL" = "nuitka" ]; then
     "$PYTHON" -m pip install --quiet --upgrade nuitka
     if [ "$ONEFILE" -eq 1 ]; then MODE="--onefile"; else MODE="--standalone"; fi
+    # Nuitka's --include-data-dir skips shared libraries, so include each
+    # native lib explicitly as a data file (ctypes loads it at runtime).
+    NUITKA_LIBS=()
+    for f in "$STAGE"/*; do
+        [ -e "$f" ] && NUITKA_LIBS+=("--include-data-files=$f=catkey_core/$(basename "$f")")
+    done
     "$PYTHON" -m nuitka "$MODE" \
         --enable-plugin=pyside6 \
         --output-filename="$NAME" \
-        --include-data-dir="$STAGE=catkey_core" \
         --include-data-dir="$LOCALES=locales" \
+        "${NUITKA_LIBS[@]}" \
         --assume-yes-for-downloads \
         --output-dir="$ROOT/dist" \
         "$ENTRY"
