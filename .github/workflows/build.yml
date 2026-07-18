@@ -9,6 +9,12 @@ on:
   release:
     types: [published]
 
+env:
+  # Force Node 24 for actions ahead of the spring-2026 Node 20 EOL.
+  # Silences the "Node.js 20 is deprecated" warning for actions still
+  # shipping a Node 20 runtime (e.g. actions/upload-artifact@v5).
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   windows-pyinstaller:
     name: Windows (PyInstaller)
