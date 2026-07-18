@@ -15,7 +15,11 @@ param(
     [string]$Tool = 'pyinstaller',
     [switch]$OneFile,
     [switch]$Clean,
-    [string]$Python = ''
+    [string]$Python = '',
+    [ValidateSet('x64', 'x86', 'arm64')]
+    [string]$Arch = 'x64',
+    [ValidateSet('msvc', 'mingw')]
+    [string]$Compiler = 'msvc'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -41,19 +45,47 @@ function Remove-Artifacts {
 
 if ($Clean) { Remove-Artifacts; Write-Host 'Cleaned.' -ForegroundColor Green; exit 0 }
 
-# The C core DLL must exist so it can be bundled.
+# --- Build the native core for the requested arch/compiler ---------------
 $Dll = Join-Path $CoreDir 'catkey_core.dll'
+$srcs = @((Join-Path $CoreDir 'vietnamese_tep.c'), (Join-Path $CoreDir 'windows' 'catkey_hook.c'))
 if (-not (Test-Path $Dll)) {
-    Write-Host 'catkey_core.dll not found - building it...' -ForegroundColor Yellow
-    & $Python -c @"
-import importlib.util, sys
-spec = importlib.util.spec_from_file_location('catkey_core_bind', r'$Root\catkey_ui\core.py')
-m = importlib.util.module_from_spec(spec); sys.modules['catkey_core_bind'] = m
-spec.loader.exec_module(m)
-print('core built:', m.core_available())
-"@
-    if (-not (Test-Path $Dll)) { throw "Failed to build catkey_core.dll. Build it manually first." }
+    Write-Host "Building catkey_core.dll ($Arch/$Compiler)..." -ForegroundColor Yellow
+    if ($Compiler -eq 'msvc') {
+        $vc = switch ($Arch) {
+            'x86'    { 'vcvars32.bat' }
+            'arm64'  { 'vcvarsarm64.bat' }
+            default  { 'vcvars64.bat' }
+        }
+        $vcvars = Get-ChildItem "C:\Program Files\Microsoft Visual Studio",
+            "C:\Program Files (x86)\Microsoft Visual Studio", "E:\Visual Studio" `
+            -Filter $vc -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+        if (-not $vcvars) { throw "MSVC $vc not found." }
+        $deff = Join-Path $CoreDir 'catkey_core.def'
+        $cmd = ('"{0}" && cl /nologo /w /std:c17 /utf-8 /LD /Fe:"{1}" {2} /link /DEF:"{3}" user32.lib' `
+                -f $vcvars, $Dll, (($srcs | ForEach-Object { "`"$_`"" }) -join ' '), $deff)
+        cmd /c $cmd | Out-Null
+        if (-not (Test-Path $Dll)) { throw "MSVC build failed." }
+    } else {
+        # MinGW (MSYS2): select the toolchain matching the target arch.
+        $envs = @{
+            x64    = 'mingw64'
+            x86    = 'mingw32'
+            arm64  = 'clangarm64'
+        }
+        $msys = "C:\msys64\msys2_shell.cmd"
+        if (-not (Test-Path $msys)) { throw "MSYS2 not found at $msys." }
+        $tool = if ($Arch -eq 'arm64') { 'clang' } else { 'gcc' }
+        $cmd = ('C:\msys64\msys2_shell.cmd -{0} -defterm -no-start -here -c ' +
+                '"{1} -shared -O2 -o \"{2}\" \"{3}\" \"{4}\" -luser32"' `
+                -f $envs[$Arch], $tool, $Dll, $srcs[0], $srcs[1])
+        cmd /c $cmd | Out-Null
+        if (-not (Test-Path $Dll)) { throw "MinGW ($Arch) build failed." }
+    }
+    Write-Host "core built: $Dll" -ForegroundColor Green
 }
+
+# Suffix to keep matrix outputs (arch/compiler) from colliding.
+$Suffix = "$Arch-$Compiler"
 
 Remove-Artifacts
 
@@ -77,11 +109,13 @@ if ($Tool -eq 'pyinstaller') {
     $args += $OneFile ? '--onefile' : '--onedir'
     $args += $Entry
     & $Python @args
-    $out = $OneFile ? (Join-Path $Root "dist\$Name.exe") : (Join-Path $Root "dist\$Name\$Name.exe")
+    $out = $OneFile ? (Join-Path $Root "dist\$Name-$Suffix.exe") : (Join-Path $Root "dist\$Name-$Suffix\$Name.exe")
 }
 else {
     & $Python -m pip install --quiet --upgrade nuitka
     $mode = $OneFile ? '--onefile' : '--standalone'
+    # Cross-arch: tell Nuitka the target. Native (x64 on x64) needs nothing.
+    $narch = if ($Arch -eq 'x64') { @() } else { "--target-arch=$Arch" }
     $args = @(
         '-m', 'nuitka', $mode,
         '--enable-plugin=pyside6',
@@ -89,8 +123,8 @@ else {
         "--output-filename=$Name.exe",
         "--include-data-dir=$Locales=locales",
         '--assume-yes-for-downloads',
-        "--output-dir=$(Join-Path $Root 'dist')"
-    )
+        "--output-dir=$(Join-Path $Root 'dist' $Suffix)"
+    ) + $narch
     # Nuitka's --include-data-dir skips *.dll; force each native lib in as a
     # data file so ctypes can load it at runtime (no compiler on user's box).
     foreach ($lib in $libs) {
@@ -98,7 +132,7 @@ else {
     }
     $args += $Entry
     & $Python @args
-    $out = $OneFile ? (Join-Path $Root "dist\$Name.exe") : (Join-Path $Root "dist\run_ui.dist\$Name.exe")
+    $out = $OneFile ? (Join-Path $Root "dist\$Suffix\$Name.exe") : (Join-Path $Root "dist\$Suffix\run_ui.dist\$Name.exe")
 }
 
 if (Test-Path $out) {

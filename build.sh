@@ -19,6 +19,8 @@ TOOL="pyinstaller"
 ONEFILE=0
 CLEAN=0
 PYTHON=""
+ARCH="x64"
+COMPILER="gcc"
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -26,6 +28,8 @@ while [ $# -gt 0 ]; do
         --onefile) ONEFILE=1; shift ;;
         --clean) CLEAN=1; shift ;;
         --python) PYTHON="$2"; shift 2 ;;
+        --arch) ARCH="$2"; shift 2 ;;
+        --compiler) COMPILER="$2"; shift 2 ;;
         *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
 done
@@ -55,12 +59,16 @@ fi
 
 if [ ! -f "$CORE_LIB" ]; then
     echo "Native core not found - building it..."
+    # Linux x86 needs -m32; x64 is native. Compiler chosen by --compiler.
+    MFLAG=""
+    if [ "$ARCH" = "x86" ]; then MFLAG="-m32"; fi
     if [ "$(uname)" = "Linux" ]; then
         # Match catkey_ui/core.py: the Linux .so is the conversion engine only
         # (the X11 daemon is a separate program, not loaded by the app).
-        cc -shared -fPIC -O2 -o "$CORE_LIB" \
+        CC="$COMPILER"
+        "$CC" -shared -fPIC -O2 $MFLAG -o "$CORE_LIB" \
             "$CORE_DIR/vietnamese_tep.c" 2>&1 || {
-            echo "Failed to build the native core (need gcc/cc)." >&2; exit 1; }
+            echo "Failed to build the native core (need $CC)." >&2; exit 1; }
     elif [ "$(uname)" = "Darwin" ]; then
         cc -shared -fPIC -O2 -o "$CORE_LIB" \
             "$CORE_DIR/vietnamese_tep.c" 2>&1 || {
@@ -71,6 +79,8 @@ if [ ! -f "$CORE_LIB" ]; then
     fi
     echo "core built: $CORE_LIB"
 fi
+
+SUFFIX="$ARCH-$COMPILER"
 
 clean_artifacts
 
@@ -88,25 +98,27 @@ if [ "$TOOL" = "pyinstaller" ]; then
     if [ "$ONEFILE" -eq 1 ]; then ARGS+=(--onefile); else ARGS+=(--onedir); fi
     ARGS+=("$ENTRY")
     "$PYTHON" "${ARGS[@]}"
-    if [ "$ONEFILE" -eq 1 ]; then OUT="$ROOT/dist/$NAME"; else OUT="$ROOT/dist/$NAME/$NAME"; fi
+    if [ "$ONEFILE" -eq 1 ]; then OUT="$ROOT/dist/$NAME-$SUFFIX"; else OUT="$ROOT/dist/$NAME-$SUFFIX/$NAME"; fi
 elif [ "$TOOL" = "nuitka" ]; then
     "$PYTHON" -m pip install --quiet --upgrade nuitka
     if [ "$ONEFILE" -eq 1 ]; then MODE="--onefile"; else MODE="--standalone"; fi
+    NARCH=""
+    [ "$ARCH" != "x64" ] && NARCH="--target-arch=$ARCH"
     # Nuitka's --include-data-dir skips shared libraries, so include each
     # native lib explicitly as a data file (ctypes loads it at runtime).
     NUITKA_LIBS=()
     for f in "$STAGE"/*; do
         [ -e "$f" ] && NUITKA_LIBS+=("--include-data-files=$f=catkey_core/$(basename "$f")")
     done
-    "$PYTHON" -m nuitka "$MODE" \
+    "$PYTHON" -m nuitka "$MODE" $NARCH \
         --enable-plugin=pyside6 \
         --output-filename="$NAME" \
         --include-data-dir="$LOCALES=locales" \
         "${NUITKA_LIBS[@]}" \
         --assume-yes-for-downloads \
-        --output-dir="$ROOT/dist" \
+        --output-dir="$ROOT/dist/$SUFFIX" \
         "$ENTRY"
-    if [ "$ONEFILE" -eq 1 ]; then OUT="$ROOT/dist/$NAME"; else OUT="$ROOT/dist/run_ui.dist/$NAME"; fi
+    if [ "$ONEFILE" -eq 1 ]; then OUT="$ROOT/dist/$SUFFIX/$NAME"; else OUT="$ROOT/dist/$SUFFIX/run_ui.dist/$NAME"; fi
 else
     echo "Unknown tool: $TOOL (use pyinstaller or nuitka)" >&2; exit 1
 fi
