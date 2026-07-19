@@ -230,9 +230,20 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           path: artifacts
+      - name: Package release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          for dir in artifacts/VibiKey-*; do
+            [ -d "$dir" ] || continue
+            name=$(basename "$dir")
+            (cd "$dir" && zip -qr "$GITHUB_WORKSPACE/release-assets/$name.zip" .)
+          done
+          test "$(find release-assets -maxdepth 1 -name '*.zip' | wc -l)" -gt 0
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || format('run-{0}', github.run_id) }}
           body_path: artifacts/release-notes/BODY.md
-          files: artifacts/**/*
+          files: release-assets/*.zip
