@@ -11,9 +11,11 @@
 .EXAMPLE
     .\build.ps1                       # PyInstaller onedir, x64, MSVC
     .\build.ps1 -Tool nuitka          # Nuitka standalone
+    .\build.ps1 -t nuitka             # same, short form (-t == -Tool)
     .\build.ps1 -OneFile              # single-file exe (PyInstaller)
     .\build.ps1 -Tool nuitka -OneFile # Nuitka onefile
     .\build.ps1 -Arch x86 -Compiler mingw   # 32-bit Windows build via MSYS2
+    .\build.ps1 -a x86 -c mingw            # same, short form (-a/-c)
     .\build.ps1 -Arch arm64 -Compiler msvc  # ARM64 Windows via MSVC
     .\build.ps1 -Clean                # remove build artifacts and exit
     .\build.ps1 -Help                  # show this help and exit
@@ -25,13 +27,17 @@
 [CmdletBinding()]
 param(
     [switch]$Help,
+    [Alias('t')]
     [ValidateSet('pyinstaller', 'nuitka')]
     [string]$Tool = 'pyinstaller',
     [switch]$OneFile,
     [switch]$Clean,
+    [Alias('p')]
     [string]$Python = '',
+    [Alias('a')]
     [ValidateSet('x64', 'x86', 'arm64')]
     [string]$Arch = 'x64',
+    [Alias('c')]
     [ValidateSet('msvc', 'mingw')]
     [string]$Compiler = 'msvc'
 )

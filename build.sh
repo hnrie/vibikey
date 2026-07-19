@@ -4,9 +4,11 @@
 # Usage:
 #   ./build.sh                     # PyInstaller, onedir (default)
 #   ./build.sh --tool nuitka       # Nuitka, standalone
+#   ./build.sh -t nuitka           # same, short form (-t == --tool)
 #   ./build.sh --onefile           # single-file exe
 #   ./build.sh --tool nuitka --onefile
 #   ./build.sh --arch x86 --compiler clang   # x86 Linux build via clang
+#   ./build.sh -a x86 -c clang             # same, short form (-a/-c)
 #   ./build.sh --arch x64 --compiler gcc     # x64 Linux build via gcc
 #   ./build.sh --clean             # remove build artifacts and exit
 #   ./build.sh --help              # show this help and exit
@@ -27,16 +29,16 @@ Usage: $0 [options]
 Build CatKey into a standalone executable using PyInstaller or Nuitka.
 
 Options:
-  --tool pyinstaller|nuitka   Packaging backend (default: pyinstaller)
+  -t, --tool pyinstaller|nuitka  Packaging backend (default: pyinstaller)
   --onefile                   Build a single self-extracting executable
                               (PyInstaller onefile / Nuitka onefile)
-  --arch x86|x64              Target architecture (default: x64)
-  --compiler gcc|clang        Native-core compiler (default: gcc)
-  --python PATH               Python interpreter to use
+  -a, --arch x86|x64           Target architecture (default: x64)
+  -c, --compiler gcc|clang    Native-core compiler (default: gcc)
+  -p, --python PATH           Python interpreter to use
                               (default: ../.venv/bin/python or python3)
   --clean                     Remove build artifacts (build/, dist/, *.spec)
                               and exit
-  --help                      Show this help and exit
+  -h, --help                  Show this help and exit
 
 Output:
   dist/CatKey-<arch>-<compiler>/   PyInstaller onedir
@@ -59,12 +61,12 @@ COMPILER="gcc"
 while [ $# -gt 0 ]; do
     case "$1" in
         --help|-h) show_help; exit 0 ;;
-        --tool) TOOL="$2"; shift 2 ;;
+        -t|--tool) TOOL="$2"; shift 2 ;;
         --onefile) ONEFILE=1; shift ;;
         --clean) CLEAN=1; shift ;;
-        --python) PYTHON="$2"; shift 2 ;;
-        --arch) ARCH="$2"; shift 2 ;;
-        --compiler) COMPILER="$2"; shift 2 ;;
+        -p|--python) PYTHON="$2"; shift 2 ;;
+        -a|--arch) ARCH="$2"; shift 2 ;;
+        -c|--compiler) COMPILER="$2"; shift 2 ;;
         *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
 done
