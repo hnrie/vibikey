@@ -6,6 +6,7 @@
  * Handles: initialization, method selection, daemon startup
  */
 
+#define _DEFAULT_SOURCE
 #include "config.h"
 #include "vibikey_input_method_dialog.h"
 #include <stdio.h>

@@ -16,12 +16,20 @@ void vibikey_log_set_callback(vibikey_log_func cb) {
 }
 
 void vibikey_log(int level, const char *format, ...) {
-    if (level > vibikey_log_level) {
+    if (level < vibikey_log_level) {
         return;
     }
 
     const char *level_str[] = { "DEBUG", "INFO", "WARN", "ERROR" };
-    const char *prefix = level_str[level];
+    const char *prefix = (level >= 0 && level <= 3) ? level_str[level] : "UNKNOWN";
+
+    if (vibikey_log_callback) {
+        va_list args;
+        va_start(args, format);
+        vibikey_log_callback(level, format, args);
+        va_end(args);
+        return;
+    }
 
     fprintf(stderr, "[VIBIKEY][%s] ", prefix);
 

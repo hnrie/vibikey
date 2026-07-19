@@ -128,7 +128,9 @@ find "$CORE_DIR" -maxdepth 1 -type f \( -name '*.so' -o -name '*.dylib' -o -name
     -exec cp {} "$STAGE/" \;
 
 if [ "$TOOL" = "pyinstaller" ]; then
-    "$PYTHON" -m pip install --quiet --upgrade pyinstaller
+    if ! "$PYTHON" -c "import PyInstaller" 2>/dev/null; then
+        "$PYTHON" -m pip install --quiet --upgrade --break-system-packages pyinstaller 2>/dev/null || "$PYTHON" -m pip install --quiet --upgrade pyinstaller || true
+    fi
     ARGS=(-m PyInstaller --noconfirm --clean --name "$NAME-$SUFFIX" --windowed
           --add-data "$STAGE:vibikey_core"
           --add-data "$LOCALES:locales")
@@ -137,7 +139,9 @@ if [ "$TOOL" = "pyinstaller" ]; then
     "$PYTHON" "${ARGS[@]}"
     if [ "$ONEFILE" -eq 1 ]; then OUT="$ROOT/dist/$NAME-$SUFFIX"; else OUT="$ROOT/dist/$NAME-$SUFFIX/$NAME-$SUFFIX"; fi
 elif [ "$TOOL" = "nuitka" ]; then
-    "$PYTHON" -m pip install --quiet --upgrade nuitka
+    if ! "$PYTHON" -c "import nuitka" 2>/dev/null; then
+        "$PYTHON" -m pip install --quiet --upgrade --break-system-packages nuitka 2>/dev/null || "$PYTHON" -m pip install --quiet --upgrade nuitka || true
+    fi
     if [ "$ONEFILE" -eq 1 ]; then MODE="--onefile"; else MODE="--standalone"; fi
     NARCH=""
     [ "$ARCH" != "x64" ] && NARCH="--target-arch=$ARCH"
@@ -149,6 +153,7 @@ elif [ "$TOOL" = "nuitka" ]; then
     done
     "$PYTHON" -m nuitka "$MODE" $NARCH \
         --enable-plugin=pyside6 \
+        --static-libpython=no \
         --output-filename="$NAME" \
         --include-data-dir="$LOCALES=locales" \
         "${NUITKA_LIBS[@]}" \
