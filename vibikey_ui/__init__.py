@@ -1,5 +1,8 @@
 """VibiKey - Vietnamese Input Method UI"""
 
-from .app import VibiKeyApp
+try:
+    from .app import VibiKeyApp
+except Exception:  # PySide6 / libGL may be unavailable in headless/test envs
+    VibiKeyApp = None  # type: ignore
 
 __all__ = ["VibiKeyApp"]
