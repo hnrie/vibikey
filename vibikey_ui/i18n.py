@@ -20,12 +20,9 @@ LANG_VI = "vi"
 
 
 def _data_root() -> Path:
-    # Frozen (PyInstaller/Nuitka onefile) bundles data next to _MEIPASS/exe.
     base = getattr(sys, "_MEIPASS", None)
     if base:
         return Path(base)
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parent.parent
 
 

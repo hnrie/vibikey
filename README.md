@@ -62,15 +62,22 @@ automatically on first run if a compiler is available.
 
 ## Building a distributable
 
+Builds produce **one self-extracting binary** (PyInstaller `--onefile` or
+Nuitka `--onefile`). Output lands in `dist/`:
+
+- Windows: `dist/VibiKey-<arch>-<compiler>-<tool>.exe`
+- Linux: `dist/VibiKey-<arch>-<compiler>-<tool>`
+
 ```powershell
-# PyInstaller (default) or Nuitka; add -OneFile for a single exe
-.\build.ps1 -Tool pyinstaller
-.\build.ps1 -Tool nuitka -OneFile
+.\build.ps1                       # PyInstaller single .exe (default)
+.\build.ps1 -Tool nuitka          # Nuitka single .exe
+.\build.ps1 -NoOneFile            # folder build only for debugging
 ```
 
 ```bash
-./build.sh --tool pyinstaller
-./build.sh --tool nuitka --onefile
+./build.sh                        # PyInstaller single binary (default)
+./build.sh --tool nuitka          # Nuitka single binary
+./build.sh --no-onefile           # folder build only for debugging
 ```
 
 If you plan to share the build with others, follow the verification

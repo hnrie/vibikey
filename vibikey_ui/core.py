@@ -21,8 +21,6 @@ def _data_root() -> Path:
     base = getattr(sys, "_MEIPASS", None)
     if base:
         return Path(base)
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parent.parent
 
 

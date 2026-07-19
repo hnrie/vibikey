@@ -36,19 +36,35 @@ jobs:
           update: true
           install: mingw-w64-x86_64-gcc
       - name: Install deps
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install PySide6-Essentials pynput ${{ matrix.tool }}
-      - name: Build VibiKey
+          python -m pip install PySide6-Essentials pynput
+          if ("${{ matrix.tool }}" -eq "nuitka") {
+            python -m pip install "Nuitka[app]" ordered-set zstandard
+          } else {
+            python -m pip install pyinstaller
+          }
+      - name: Build VibiKey (onefile)
         shell: pwsh
         run: |
           ./build.ps1 -Tool ${{ matrix.tool }} -Arch ${{ matrix.arch }} -Compiler ${{ matrix.compiler }}
+      - name: Verify single-file artifact
+        shell: pwsh
+        run: |
+          $exe = "dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}.exe"
+          if (-not (Test-Path $exe)) { throw "Missing onefile output: $exe" }
+          $item = Get-Item $exe
+          if ($item.Length -lt 1MB) { throw "Exe too small ($($item.Length) bytes): $exe" }
+          Write-Host "OK: $($item.FullName) ($([math]::Round($item.Length/1MB,1)) MB)"
+          Get-ChildItem dist -Recurse | Select-Object FullName, Length
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
           name: VibiKey-Windows-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}
-          path: dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}
+          path: dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}.exe
           if-no-files-found: error
+          compression-level: 0
   linux:
     name: Linux ${{ matrix.arch }} (${{ matrix.compiler }} / ${{ matrix.tool }})
     runs-on: ubuntu-24.04
@@ -69,24 +85,39 @@ jobs:
       - name: Install toolchain and Qt libs
         run: |
           sudo apt-get update
-          PKGS="build-essential libgl1 libegl1 libglib2.0-0 libxkbcommon0 libdbus-1-3
+          PKGS="build-essential ccache patchelf libgl1 libegl1 libglib2.0-0 libxkbcommon0 libdbus-1-3
                 libxcb-xinerama0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1
                 libxcb-image0 libxcb-shm0 libxcb-randr0 libxcb-render-util0
                 libxcb-xkb1 libxcb1 libfontconfig1 libfreetype6"
           if [ "${{ matrix.compiler }}" = "clang" ]; then PKGS="$PKGS clang lld"; fi
           sudo apt-get install -y $PKGS
           python -m pip install --upgrade pip
-          pip install PySide6-Essentials pynput ${{ matrix.tool }}
-      - name: Build VibiKey
+          python -m pip install PySide6-Essentials pynput
+          if [ "${{ matrix.tool }}" = "nuitka" ]; then
+            python -m pip install "Nuitka[app]" ordered-set zstandard
+          else
+            python -m pip install pyinstaller
+          fi
+      - name: Build VibiKey (onefile)
         run: |
           chmod +x build.sh
-          CC=${{ matrix.compiler }} ./build.sh --tool ${{ matrix.tool }} --arch ${{ matrix.arch }} --compiler ${{ matrix.compiler }}
+          CC=${{ matrix.compiler }} ./build.sh --tool ${{ matrix.tool }} --arch ${{ matrix.arch }} --compiler ${{ matrix.compiler }} --onefile
+      - name: Verify single-file artifact
+        run: |
+          bin="dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}"
+          test -f "$bin"
+          test -x "$bin"
+          size=$(stat -c%s "$bin")
+          if [ "$size" -lt 1000000 ]; then echo "Binary too small: $size"; exit 1; fi
+          echo "OK: $bin ($(du -h "$bin" | cut -f1))"
+          ls -lah dist/
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
           name: VibiKey-Linux-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}
-          path: dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}
+          path: dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}
           if-no-files-found: error
+          compression-level: 0
   release-notes:
     name: Generate release notes (AI)
     needs: [windows, linux]
@@ -141,7 +172,7 @@ jobs:
           import json, os, re, urllib.error, urllib.request
 
           context = open("release-notes/CONTEXT.md", encoding="utf-8").read()
-          context = context[:150_000]  # MiMo-V2.5 has a 200k context window
+          context = context[:150_000]
 
           prompt = f"""You are drafting release notes for VibiKey, a desktop app.
           Use the FULL context below (commit log, diffstat, merged PR titles/descriptions)
@@ -166,7 +197,6 @@ jobs:
           }).encode()
 
           def fallback_notes(source):
-              """Produce useful notes even when the optional AI service is unavailable."""
               commits = []
               in_commit_log = False
               for line in source.splitlines():
@@ -176,7 +206,6 @@ jobs:
                   if line.startswith("## ") and in_commit_log:
                       break
                   if in_commit_log and line.startswith("- "):
-                      # Remove the hash/author while retaining the actual change summary.
                       item = re.sub(r"^- [0-9a-f]+ ", "", line)
                       item = re.sub(r" \\([^)]+\\)$", "", item)
                       commits.append(item)
@@ -230,20 +259,44 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           path: artifacts
-      - name: Package release assets
+      - name: Collect single-file release assets
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p release-assets
+          shopt -s nullglob
+          count=0
           for dir in artifacts/VibiKey-*; do
             [ -d "$dir" ] || continue
             name=$(basename "$dir")
-            (cd "$dir" && zip -qr "$GITHUB_WORKSPACE/release-assets/$name.zip" .)
+            files=("$dir"/*)
+            if [ ${#files[@]} -eq 0 ]; then
+              echo "empty artifact dir: $dir" >&2
+              exit 1
+            fi
+            for f in "${files[@]}"; do
+              [ -f "$f" ] || continue
+              base=$(basename "$f")
+              if [[ "$name" == Windows-* ]]; then
+                if [[ "$base" != *.exe ]]; then
+                  out="${name}.exe"
+                else
+                  out="$base"
+                fi
+              else
+                out="$name"
+              fi
+              cp -f "$f" "release-assets/$out"
+              chmod +x "release-assets/$out" || true
+              echo "asset: release-assets/$out ($(du -h "release-assets/$out" | cut -f1))"
+              count=$((count + 1))
+            done
           done
-          test "$(find release-assets -maxdepth 1 -name '*.zip' | wc -l)" -gt 0
+          ls -lah release-assets/
+          test "$count" -gt 0
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || format('run-{0}', github.run_id) }}
           body_path: artifacts/release-notes/BODY.md
-          files: release-assets/*.zip
+          files: release-assets/*

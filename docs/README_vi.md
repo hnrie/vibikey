@@ -59,14 +59,21 @@ trong lần chạy đầu tiên nếu có trình biên dịch.
 
 ## Tạo bản phân phối
 
+Mặc định build ra **một file duy nhất** (PyInstaller/Nuitka onefile):
+
+- Windows: `dist/VibiKey-<arch>-<compiler>-<tool>.exe`
+- Linux: `dist/VibiKey-<arch>-<compiler>-<tool>`
+
 ```powershell
-.\build.ps1 -Tool pyinstaller
-.\build.ps1 -Tool nuitka -OneFile
+.\build.ps1                       # PyInstaller một .exe
+.\build.ps1 -Tool nuitka          # Nuitka một .exe
+.\build.ps1 -NoOneFile            # thư mục (chỉ để debug)
 ```
 
 ```bash
-./build.sh --tool pyinstaller
-./build.sh --tool nuitka --onefile
+./build.sh                        # PyInstaller một binary
+./build.sh --tool nuitka          # Nuitka một binary
+./build.sh --no-onefile           # thư mục (chỉ để debug)
 ```
 
 Nếu định chia sẻ bản build cho người khác, hãy tuân theo yêu cầu kiểm

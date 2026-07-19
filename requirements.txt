@@ -1,24 +1,23 @@
 # VibiKey requirements
 #
 # Install modes (PEP 508 extras markers):
-#   pip install -r requirements.txt                 # runtime + Nuitka (basic)
-#   pip install -r requirements.txt --extra onefile  # + Nuitka[app] for onefile
-#   pip install -r requirements.txt --extra all      # + Nuitka[all] (everything)
-#   pip install -r requirements.txt --extra build     # + PyInstaller
+#   pip install -r requirements.txt                 # runtime only
+#   pip install -r requirements.txt --extra onefile # Nuitka[app] (single-file builds)
+#   pip install -r requirements.txt --extra all     # Nuitka[all]
+#   pip install -r requirements.txt --extra build   # PyInstaller (single-file builds)
 
 # --- Runtime (needed to run run_ui.py) ---
 PySide6-Essentials>=6.5
 pynput>=1.8
 
-# --- Nuitka ---
-# Base: Nuitka (basic packaging backend).
-Nuitka>=2.4
-
-# `--extra onefile`: Nuitka with onefile-supporting dependencies (Nuitka[app]).
-Nuitka[app] ; extra == "onefile"
+# --- Packaging (onefile is the default build mode) ---
+# Nuitka onefile needs the [app] extra (zstandard compression, etc.).
+Nuitka[app]>=2.4 ; extra == "onefile"
 
 # `--extra all`: Nuitka with every optional dependency (Nuitka[all]).
 Nuitka[all] ; extra == "all"
 
-# `--extra build`: PyInstaller backend (alternative to Nuitka).
+# PyInstaller onefile backend.
 pyinstaller>=6.0 ; extra == "build"
+ordered-set>=4.1 ; extra == "onefile"
+zstandard>=0.20 ; extra == "onefile"
