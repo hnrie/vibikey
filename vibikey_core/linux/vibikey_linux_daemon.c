@@ -8,10 +8,22 @@
 #include "../config.h"
 #include "../vietnamese_tep.h"
 #include "vibikey_linux_daemon.h"
+#if __has_include(<X11/keysym.h>)
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
+#else
+#ifndef XK_BackSpace
+#define XK_BackSpace 0xFF08
+#define XK_space     0x0020
+#define XK_Return    0xFF0D
+#endif
+#define DefaultRootWindow(disp) 0
+#define XOpenDisplay(name) NULL
+#define XCloseDisplay(disp) ((void)0)
+#endif
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 vibikey_linux_mode_t vibikey_linux_current_mode = VIBIKEY_LINUX_BACKSPACE;
 Display *vibikey_x_display = NULL;
@@ -63,6 +75,7 @@ void vibikey_linux_set_mode(vibikey_linux_mode_t mode) {
  * Filter key event
  */
 int vibikey_linux_filter_key(XKeyEvent *xevent, KeySym keysym, int is_press) {
+    (void)xevent;
     if (!is_press) {
         return 0;  /* Only process key press */
     }

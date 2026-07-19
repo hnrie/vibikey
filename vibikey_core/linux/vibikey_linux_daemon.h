@@ -14,7 +14,28 @@
 #if defined(__linux__)
 
 #include <stdint.h>
+#if __has_include(<X11/Xlib.h>)
 #include <X11/Xlib.h>
+#else
+typedef void Display;
+typedef unsigned long Window;
+typedef struct XKeyEvent {
+    int type;
+    unsigned long serial;
+    int send_event;
+    Display *display;
+    Window window;
+    Window root;
+    Window subwindow;
+    unsigned long time;
+    int x, y;
+    int x_root, y_root;
+    unsigned int state;
+    unsigned int keycode;
+    int same_screen;
+} XKeyEvent;
+typedef unsigned long KeySym;
+#endif
 #include "../vietnamese_tep.h"
 #include "../config.h"
 

@@ -251,13 +251,6 @@ static LRESULT CALLBACK ll_proc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     if (g_raw_len >= BUF_MAX - 1) reset_word();
 
-    /* If the previous word was already converted (diacritic applied), the next
-     * letter starts a new word. Prevents bug where "tô" + "o" draws "tôo"
-     * instead of resetting and drawing "too". */
-    if (g_was_converted) {
-        reset_word();
-    }
-
     /* Add the raw key and convert. If the conversion is unchanged we let the
      * original key pass through (avoids doubling). If a diacritic applied we
      * rewrote the screen ourselves, so swallow the original key. */

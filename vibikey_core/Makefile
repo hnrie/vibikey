@@ -40,8 +40,16 @@ help:
 # Linux build
 # ============================================================================
 
+HAS_X11 := $(shell $(CC) -lX11 -x c /dev/null -o /dev/null 2>/dev/null && echo yes)
+HAS_NCURSES := $(shell $(CC) -lncurses -x c /dev/null -o /dev/null 2>/dev/null && echo yes)
+
 linux: CFLAGS += -DVIBIKEY_LINUX -Wall -Wextra -O2 -std=c11
-linux: LDFLAGS += -lX11 -lncurses
+ifeq ($(HAS_X11),yes)
+linux: LDFLAGS += -lX11
+endif
+ifeq ($(HAS_NCURSES),yes)
+linux: LDFLAGS += -lncurses
+endif
 linux: $(TARGET)
 
 # ============================================================================
@@ -127,8 +135,10 @@ $(TARGET)_msvc.exe: $(WIN_MSVC_OBJS)
 # ============================================================================
 
 test: CFLAGS += -DVIBIKEY_TEST
-test: linux
-	./$(TARGET)
+test:
+	$(CC) $(CFLAGS) -o test_runner vietnamese_tep.c
+	./test_runner
+	rm -f test_runner
 
 # ============================================================================
 # Clean

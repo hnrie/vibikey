@@ -9,7 +9,13 @@
 
 #include "../vibikey_input_method_dialog.h"
 #include "../config.h"
+#if __has_include(<ncurses.h>)
 #include <ncurses.h>
+#elif __has_include(<ncurses/ncurses.h>)
+#include <ncurses/ncurses.h>
+#define HAVE_NCURSES 1
+#endif
+#include <stdio.h>
 #include <string.h>
 
 /*
@@ -25,6 +31,7 @@ int vibikey_show_method_dialog(void) {
         return -1;
     }
 
+#if defined(NCURSES_VERSION) || defined(HAVE_NCURSES)
     /* Initialize ncurses */
     initscr();
     cbreak();
@@ -106,6 +113,21 @@ int vibikey_show_method_dialog(void) {
 
     endwin();
     return selected;
+#else
+    /* Fallback CLI selection when ncurses is not compiled in */
+    printf("\n=== VibiKey - Select Input Method ===\n");
+    for (int i = 0; i < count; i++) {
+        printf("%d. %s (%s)%s\n",
+               i + 1, methods[i].name, methods[i].description,
+               methods[i].is_available ? "" : " [Unavailable]");
+    }
+    printf("Select option (1-%d): ", count);
+    int sel = 0;
+    if (scanf("%d", &sel) == 1 && sel >= 1 && sel <= count && methods[sel - 1].is_available) {
+        return methods[sel - 1].type;
+    }
+    return -1;
+#endif
 }
 
 #endif /* VIBIKEY_LINUX */
