@@ -98,4 +98,5 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name || format('run-{0}', github.run_id) }}
           files: artifacts/**/*
