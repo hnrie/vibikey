@@ -87,9 +87,116 @@ jobs:
           name: VibiKey-Linux-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.tool }}
           path: dist/VibiKey-${{ matrix.arch }}-${{ matrix.compiler }}
           if-no-files-found: error
+  release-notes:
+    name: Generate release notes (AI)
+    needs: [windows, linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Resolve context range
+        id: range
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            CURRENT="${{ github.event.release.tag_name }}"
+          else
+            CURRENT="run-${{ github.run_id }}"
+          fi
+          PREV_TAG=$(git describe --tags --abbrev=0 "${{ github.sha }}^" 2>/dev/null || echo "")
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Gather full context (commits, diffstat, merged PRs)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREV_TAG: ${{ steps.range.outputs.prev_tag }}
+        run: |
+          mkdir -p release-notes
+          RANGE="${PREV_TAG:+$PREV_TAG..}HEAD"
+
+          {
+            echo "## Commit log ($RANGE)"
+            git log "$RANGE" --pretty='- %h %s (%an)' --no-merges
+            echo
+            echo "## Diffstat"
+            git diff "$RANGE" --stat
+            echo
+            echo "## Merged pull requests since $PREV_TAG"
+            gh pr list --repo "${{ github.repository }}" --state merged \
+              --search "merged:>=$(git log -1 --format=%aI "${PREV_TAG:-$(git rev-list --max-parents=0 HEAD)}")" \
+              --json number,title,body,author \
+              --jq '.[] | "### #\(.number) \(.title) (@\(.author.login))\n\(.body // "")\n"' || true
+          } > release-notes/CONTEXT.md
+
+      - name: Draft release notes with MiMo-V2.5 (OpenCode Zen)
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+
+          context = open("release-notes/CONTEXT.md", encoding="utf-8").read()
+          context = context[:150_000]  # MiMo-V2.5 has a 200k context window
+
+          prompt = f"""You are drafting release notes for VibiKey, a desktop app.
+          Use the FULL context below (commit log, diffstat, merged PR titles/descriptions)
+          to write polished, user-facing release notes in Markdown.
+
+          Structure:
+          - One-paragraph summary of the release
+          - "### Features" (only if applicable)
+          - "### Fixes" (only if applicable)
+          - "### Other changes" (only if applicable)
+          - Omit empty sections. Do not invent changes not present in the context.
+          - Keep it concise and skimmable, no marketing fluff.
+
+          CONTEXT:
+          {context}
+          """
+
+          body = json.dumps({
+              "model": "mimo-v2.5-free",
+              "max_tokens": 1500,
+              "messages": [{"role": "user", "content": prompt}],
+          }).encode()
+
+          headers = {"content-type": "application/json"}
+          api_key = os.environ.get("OPENCODE_API_KEY", "")
+          if api_key:
+              headers["authorization"] = f"Bearer {api_key}"
+
+          req = urllib.request.Request(
+              "https://opencode.ai/zen/v1/chat/completions",
+              data=body,
+              headers=headers,
+          )
+          with urllib.request.urlopen(req) as resp:
+              data = json.load(resp)
+
+          text = (
+              data.get("choices", [{}])[0]
+                  .get("message", {})
+                  .get("content", "")
+          ).strip() or "_No changes detected._"
+
+          with open("release-notes/BODY.md", "w", encoding="utf-8") as f:
+              f.write(text + "\n")
+          PYEOF
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-notes
+          path: release-notes/BODY.md
+
   release:
     name: Release assets
-    needs: [windows, linux]
+    needs: [windows, linux, release-notes]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v5
@@ -99,4 +206,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || format('run-{0}', github.run_id) }}
+          body_path: artifacts/release-notes/BODY.md
           files: artifacts/**/*
