@@ -49,12 +49,14 @@ static int g_combo_latch = 0;                 /* prevents repeat while held */
 static char g_raw[BUF_MAX];
 static int  g_raw_len = 0;
 static int  g_shown_units = 0;   /* # of UTF-16 code units currently on screen */
+static int  g_was_converted = 0; /* last recompute_and_apply rewrote screen */
 
 static int g_sending = 0;        /* re-entrancy guard while we SendInput */
 
 static void reset_word(void) {
     g_raw_len = 0;
     g_shown_units = 0;
+    g_was_converted = 0;
 }
 
 /* Count UTF-16 code units needed for a UTF-8 string (BMP chars = 1 unit;
@@ -139,6 +141,7 @@ static int recompute_and_apply(void) {
      * so only delete what is currently on screen (g_shown_units). */
     rewrite(g_shown_units, wbuf);
     g_shown_units = wlen;
+    g_was_converted = 1;
     return 1;
 }
 
@@ -247,6 +250,13 @@ static LRESULT CALLBACK ll_proc(int nCode, WPARAM wParam, LPARAM lParam) {
     }
 
     if (g_raw_len >= BUF_MAX - 1) reset_word();
+
+    /* If the previous word was already converted (diacritic applied), the next
+     * letter starts a new word. Prevents bug where "tô" + "o" draws "tôo"
+     * instead of resetting and drawing "too". */
+    if (g_was_converted) {
+        reset_word();
+    }
 
     /* Add the raw key and convert. If the conversion is unchanged we let the
      * original key pass through (avoids doubling). If a diacritic applied we
