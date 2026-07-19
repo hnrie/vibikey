@@ -1,4 +1,4 @@
-# CatKey requirements
+# VibiKey requirements
 #
 # Install modes (PEP 508 extras markers):
 #   pip install -r requirements.txt                 # runtime + Nuitka (basic)

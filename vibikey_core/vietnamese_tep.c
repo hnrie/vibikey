@@ -1,5 +1,5 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Telex / VNI conversion engine (word-level).
  *
  * TEMPORARY working engine. Handles the common cases:
@@ -15,8 +15,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#define CATKEY_TEIP 1
-#define CATKEY_VNI 2
+#define VIBIKEY_TEIP 1
+#define VIBIKEY_VNI 2
 #define MAX_OUTPUT_LENGTH 64
 
 /* Tone indices */
@@ -343,32 +343,32 @@ static int convert_vni(const char *in, char *out, int max) {
 
 /* ---- Public API (unchanged signatures) -------------------------------- */
 
-int catkey_convert_word(const char *word, char *output, int max_len, int method) {
+int vibikey_convert_word(const char *word, char *output, int max_len, int method) {
     if (!word || !output || max_len < 1) return 0;
-    if (method == CATKEY_VNI) return convert_vni(word, output, max_len);
+    if (method == VIBIKEY_VNI) return convert_vni(word, output, max_len);
     return convert_telex(word, output, max_len);
 }
 
-int catkey_process_input(const char *sequence, char *output, int max_output_len, int method) {
-    return catkey_convert_word(sequence, output, max_output_len, method);
+int vibikey_process_input(const char *sequence, char *output, int max_output_len, int method) {
+    return vibikey_convert_word(sequence, output, max_output_len, method);
 }
 
 #ifdef _WIN32
 #include <windows.h>
-int catkey_modifier_pressed(int vk_code) {
+int vibikey_modifier_pressed(int vk_code) {
     return (GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0;
 }
 #else
-int catkey_modifier_pressed(int vk_code) { (void)vk_code; return 0; }
+int vibikey_modifier_pressed(int vk_code) { (void)vk_code; return 0; }
 #endif
 
-#ifdef CATKEY_TEST
+#ifdef VIBIKEY_TEST
 #include <stdio.h>
 int main(void) {
     const char *tests[] = {"dd","aa","chaof","vieejt","tieengs","ddaa","as","af",
                            "Ee","Aa","Ow","Uwx","DDaay","TIEENGS"};
     char o[MAX_OUTPUT_LENGTH];
-    for (int i=0;i<14;i++){ catkey_convert_word(tests[i],o,sizeof o,CATKEY_TEIP); printf("%s -> %s\n",tests[i],o);}    
+    for (int i=0;i<14;i++){ vibikey_convert_word(tests[i],o,sizeof o,VIBIKEY_TEIP); printf("%s -> %s\n",tests[i],o);}    
     return 0;
 }
 #endif

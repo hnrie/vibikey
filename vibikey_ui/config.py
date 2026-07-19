@@ -1,10 +1,10 @@
 """
-CatKey - Vietnamese Input Method
+VibiKey - Vietnamese Input Method
 Configuration management (JSON-backed)
 
 Option set mirrors EVKey (input methods, character encodings, feature
-toggles, shortkeys) so the UI can be a faithful clone. CatKey-specific
-extras are grouped under the "catkey" section.
+toggles, shortkeys) so the UI can be a faithful clone. VibiKey-specific
+extras are grouped under the "vibikey" section.
 """
 
 import json
@@ -13,7 +13,7 @@ import sys
 
 from pathlib import Path
 
-APP_NAME = "CatKey"
+APP_NAME = "VibiKey"
 APP_VERSION = "0.0.1.0a"
 
 # --- Input methods (EVKey parity) ---------------------------------------
@@ -44,8 +44,8 @@ CHARSETS = [
     "Vietware F",
 ]
 
-# --- CatKey backend methods (platform-specific) -------------------------
-# Kept from the original CatKey design; used for the platform daemon.
+# --- VibiKey backend methods (platform-specific) -------------------------
+# Kept from the original VibiKey design; used for the platform daemon.
 METHOD_BACKSPACE = "backspace"
 METHOD_INLINE = "inline"
 METHOD_IBUS = "ibus"
@@ -128,8 +128,8 @@ DEFAULT_CONFIG = {
     "exception_apps": [],
     "auto_prevent_vietnamese": False,
 
-    # CatKey-specific extras (kept separate from EVKey parity)
-    "catkey": {
+    # VibiKey-specific extras (kept separate from EVKey parity)
+    "vibikey": {
         "method": METHOD_BACKSPACE,     # platform backend
         "input_mode": MODE_TEIP,        # engine mode for the C core
         "live_preview": True,

@@ -6,8 +6,8 @@
  of this license document, but changing it is not allowed.
 
 
-CatKey - Vietnamese Input Method
-Copyright (C) 2026 The CatKey Authors
+VibiKey - Vietnamese Input Method
+Copyright (C) 2026 The VibiKey Authors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Note on derivation and licensing:
 
-CatKey includes code reverse-engineered from EVKey, which is itself
+VibiKey includes code reverse-engineered from EVKey, which is itself
 based on UniKey. UniKey is distributed under the GNU General Public
-License (GPL). Because CatKey derives from that GPL-covered code, it
+License (GPL). Because VibiKey derives from that GPL-covered code, it
 is necessarily licensed under the GPL too (version 3 or, at your
 option, any later version). The full text of the GPLv3 follows.
 
@@ -45,11 +45,11 @@ removed by a recipient with respect to material they receive.
       If you distribute a modified version of this program, you must
       change its name, change its logo/icon, and mark it in reasonable
       ways as different from the original, so users are not misled into
-      thinking your modified version is the official CatKey.
+      thinking your modified version is the official VibiKey.
 
   (b) Trademarks (GPLv3 §7(e)).
       This license does NOT grant permission to use the names, logos,
-      or trademarks "CatKey" or "BlackCatOfficial" (or confusingly
+      or trademarks "VibiKey" or "BlackCatOfficial" (or confusingly
       similar marks) to endorse, promote, or brand modified versions or
       derived products, without prior written permission.
 

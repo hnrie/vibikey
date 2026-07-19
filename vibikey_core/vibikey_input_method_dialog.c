@@ -1,40 +1,40 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Input Method Selection Dialog - Common Implementation
  */
 
-#include "catkey_input_method_dialog.h"
+#include "vibikey_input_method_dialog.h"
 #include "config.h"
 #include <string.h>
 
 /* Static method table */
-static const catkey_method_desc_t s_method_table[] = {
+static const vibikey_method_desc_t s_method_table[] = {
     {
-        CATKEY_METHOD_BACKSPACE,
+        VIBIKEY_METHOD_BACKSPACE,
         "Backspace Method",
         "Type to buffer, press Backspace to commit",
-        CATKEY_PLATFORM_WINDOWS_FLAG | CATKEY_PLATFORM_LINUX_FLAG,
+        VIBIKEY_PLATFORM_WINDOWS_FLAG | VIBIKEY_PLATFORM_LINUX_FLAG,
         0  /* set at runtime */
     },
     {
-        CATKEY_METHOD_INLINE,
+        VIBIKEY_METHOD_INLINE,
         "Inline Method",
         "Auto-convert while typing",
-        CATKEY_PLATFORM_WINDOWS_FLAG | CATKEY_PLATFORM_LINUX_FLAG,
+        VIBIKEY_PLATFORM_WINDOWS_FLAG | VIBIKEY_PLATFORM_LINUX_FLAG,
         0
     },
     {
-        CATKEY_METHOD_IBUS,
+        VIBIKEY_METHOD_IBUS,
         "IBus",
         "Linux Input Bus framework",
-        CATKEY_PLATFORM_LINUX_FLAG,
+        VIBIKEY_PLATFORM_LINUX_FLAG,
         0
     },
     {
-        CATKEY_METHOD_FCITX,
+        VIBIKEY_METHOD_FCITX,
         "Fcitx",
         "Flexible Input Method Framework (Linux)",
-        CATKEY_PLATFORM_LINUX_FLAG,
+        VIBIKEY_PLATFORM_LINUX_FLAG,
         0
     }
 };
@@ -45,10 +45,10 @@ static int s_method_count = sizeof(s_method_table) / sizeof(s_method_table[0]);
  * Get current platform flags
  */
 static uint32_t get_current_platform(void) {
-#if defined(CATKEY_WINDOWS)
-    return CATKEY_PLATFORM_WINDOWS_FLAG;
-#elif defined(CATKEY_LINUX)
-    return CATKEY_PLATFORM_LINUX_FLAG;
+#if defined(VIBIKEY_WINDOWS)
+    return VIBIKEY_PLATFORM_WINDOWS_FLAG;
+#elif defined(VIBIKEY_LINUX)
+    return VIBIKEY_PLATFORM_LINUX_FLAG;
 #else
     return 0;
 #endif
@@ -57,7 +57,7 @@ static uint32_t get_current_platform(void) {
 /*
  * Get list of all input methods
  */
-int catkey_get_method_list(catkey_method_desc_t *methods, int max_count) {
+int vibikey_get_method_list(vibikey_method_desc_t *methods, int max_count) {
     if (!methods || max_count <= 0) {
         return 0;
     }
@@ -81,7 +81,7 @@ int catkey_get_method_list(catkey_method_desc_t *methods, int max_count) {
 /*
  * Check if a method is available on current platform
  */
-int catkey_method_is_available(catkey_method_type_t type) {
+int vibikey_method_is_available(vibikey_method_type_t type) {
     uint32_t platform = get_current_platform();
 
     for (int i = 0; i < s_method_count; i++) {
@@ -96,7 +96,7 @@ int catkey_method_is_available(catkey_method_type_t type) {
 /*
  * Initialize dialog subsystem
  */
-int catkey_dialog_init(void) {
+int vibikey_dialog_init(void) {
     /* Nothing to do in common implementation */
     return 0;
 }
@@ -104,7 +104,7 @@ int catkey_dialog_init(void) {
 /*
  * Cleanup dialog subsystem
  */
-int catkey_dialog_cleanup(void) {
+int vibikey_dialog_cleanup(void) {
     /* Nothing to do in common implementation */
     return 0;
 }

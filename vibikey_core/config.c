@@ -1,5 +1,5 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Configuration implementation
  */
 
@@ -8,22 +8,22 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-int catkey_log_level = CATKEY_LOG_INFO;
-catkey_log_func catkey_log_callback = NULL;
+int vibikey_log_level = VIBIKEY_LOG_INFO;
+vibikey_log_func vibikey_log_callback = NULL;
 
-void catkey_log_set_callback(catkey_log_func cb) {
-    catkey_log_callback = cb;
+void vibikey_log_set_callback(vibikey_log_func cb) {
+    vibikey_log_callback = cb;
 }
 
-void catkey_log(int level, const char *format, ...) {
-    if (level > catkey_log_level) {
+void vibikey_log(int level, const char *format, ...) {
+    if (level > vibikey_log_level) {
         return;
     }
 
     const char *level_str[] = { "DEBUG", "INFO", "WARN", "ERROR" };
     const char *prefix = level_str[level];
 
-    fprintf(stderr, "[CATKEY][%s] ", prefix);
+    fprintf(stderr, "[VIBIKEY][%s] ", prefix);
 
     va_list args;
     va_start(args, format);
@@ -33,7 +33,7 @@ void catkey_log(int level, const char *format, ...) {
     fprintf(stderr, "\n");
 }
 
-void catkey_word_init(catkey_word_buffer_t *buf) {
+void vibikey_word_init(vibikey_word_buffer_t *buf) {
     if (buf) {
         buf->length = 0;
         buf->is_voi = 0;
@@ -41,8 +41,8 @@ void catkey_word_init(catkey_word_buffer_t *buf) {
     }
 }
 
-void catkey_word_add(catkey_word_buffer_t *buf, char ch, int vomode) {
-    if (!buf || buf->length >= CATKEY_INPUT_BUFFER_SIZE - 1) {
+void vibikey_word_add(vibikey_word_buffer_t *buf, char ch, int vomode) {
+    if (!buf || buf->length >= VIBIKEY_INPUT_BUFFER_SIZE - 1) {
         return;
     }
 
@@ -55,7 +55,7 @@ void catkey_word_add(catkey_word_buffer_t *buf, char ch, int vomode) {
     buf->buffer[buf->length] = '\0';
 }
 
-void catkey_word_reset(catkey_word_buffer_t *buf) {
+void vibikey_word_reset(vibikey_word_buffer_t *buf) {
     if (buf) {
         buf->length = 0;
         buf->is_voi = 0;
@@ -63,6 +63,6 @@ void catkey_word_reset(catkey_word_buffer_t *buf) {
     }
 }
 
-const char *catkey_word_get(catkey_word_buffer_t *buf) {
+const char *vibikey_word_get(vibikey_word_buffer_t *buf) {
     return (buf) ? buf->buffer : "";
 }

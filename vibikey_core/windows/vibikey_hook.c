@@ -1,5 +1,5 @@
 /*
- * CatKey - Windows system-wide Telex/VNI hook engine.
+ * VibiKey - Windows system-wide Telex/VNI hook engine.
  *
  * Installs a WH_KEYBOARD_LL hook. Buffers the current word (raw ASCII keys),
  * and on every relevant key recomputes the Vietnamese form and rewrites what
@@ -7,11 +7,11 @@
  * UniKey/EVKey inject text into arbitrary apps (Notepad, browsers, etc.).
  *
  * Public C ABI (called from the Python UI via ctypes):
- *   int  catkey_start(void);
- *   void catkey_stop(void);
- *   void catkey_set_enabled(int on);
- *   void catkey_set_method(int method);   // 1=Telex, 2=VNI
- *   int  catkey_is_running(void);
+ *   int  vibikey_start(void);
+ *   void vibikey_stop(void);
+ *   void vibikey_set_enabled(int on);
+ *   void vibikey_set_method(int method);   // 1=Telex, 2=VNI
+ *   int  vibikey_is_running(void);
  *
  * The message loop for the LL hook runs on a dedicated thread so the caller
  * (Python) does not need to pump messages.
@@ -24,17 +24,17 @@
 #include <ctype.h>
 
 /* From vietnamese_tep.c */
-int catkey_convert_word(const char *word, char *output, int max_len, int method);
+int vibikey_convert_word(const char *word, char *output, int max_len, int method);
 
-#define CATKEY_TELEX 1
-#define CATKEY_VNI   2
+#define VIBIKEY_TELEX 1
+#define VIBIKEY_VNI   2
 #define BUF_MAX      48
 
 static HHOOK   g_hook = NULL;
 static DWORD   g_thread_id = 0;
 static HANDLE  g_thread = NULL;
 static volatile LONG g_enabled = 1;
-static volatile LONG g_method  = CATKEY_TELEX;
+static volatile LONG g_method  = VIBIKEY_TELEX;
 
 /* Toggle hotkey: a VK plus required modifier mask (1=Ctrl,2=Shift,4=Alt).
  * If g_toggle_vk == 0, the combo is "modifiers only" (g_toggle_mods must all
@@ -122,8 +122,8 @@ static int recompute_and_apply(void) {
     g_raw[g_raw_len] = 0;
 
     char utf8[BUF_MAX * 4];
-    int m = (g_method == CATKEY_VNI) ? CATKEY_VNI : CATKEY_TELEX;
-    int n = catkey_convert_word(g_raw, utf8, sizeof(utf8), m);
+    int m = (g_method == VIBIKEY_VNI) ? VIBIKEY_VNI : VIBIKEY_TELEX;
+    int n = vibikey_convert_word(g_raw, utf8, sizeof(utf8), m);
     if (n <= 0) { strcpy(utf8, g_raw); }
 
     /* If conversion equals the raw ASCII, nothing to do: let the key through. */
@@ -281,14 +281,14 @@ static DWORD WINAPI hook_thread(LPVOID param) {
     return 0;
 }
 
-__declspec(dllexport) int catkey_start(void) {
+__declspec(dllexport) int vibikey_start(void) {
     if (g_thread) return 1; /* already running */
     reset_word();
     g_thread = CreateThread(NULL, 0, hook_thread, NULL, 0, &g_thread_id);
     return g_thread != NULL;
 }
 
-__declspec(dllexport) void catkey_stop(void) {
+__declspec(dllexport) void vibikey_stop(void) {
     if (g_thread_id) PostThreadMessageW(g_thread_id, WM_QUIT, 0, 0);
     if (g_thread) {
         WaitForSingleObject(g_thread, 2000);
@@ -299,29 +299,29 @@ __declspec(dllexport) void catkey_stop(void) {
     reset_word();
 }
 
-__declspec(dllexport) void catkey_set_enabled(int on) {
+__declspec(dllexport) void vibikey_set_enabled(int on) {
     InterlockedExchange(&g_enabled, on ? 1 : 0);
     InterlockedExchange(&g_toggled_state, on ? 1 : 0);
     reset_word();
 }
 
-__declspec(dllexport) int catkey_get_enabled(void) {
+__declspec(dllexport) int vibikey_get_enabled(void) {
     return (int)InterlockedOr(&g_enabled, 0);
 }
 
-__declspec(dllexport) void catkey_set_method(int method) {
-    InterlockedExchange(&g_method, method == CATKEY_VNI ? CATKEY_VNI : CATKEY_TELEX);
+__declspec(dllexport) void vibikey_set_method(int method) {
+    InterlockedExchange(&g_method, method == VIBIKEY_VNI ? VIBIKEY_VNI : VIBIKEY_TELEX);
     reset_word();
 }
 
 /* Configure the global toggle hotkey.
  * vk=0 means "modifiers only" (mods mask: 1=Ctrl,2=Shift,4=Alt). */
-__declspec(dllexport) void catkey_set_toggle_key(int vk, int mods) {
+__declspec(dllexport) void vibikey_set_toggle_key(int vk, int mods) {
     InterlockedExchange(&g_toggle_vk, vk);
     InterlockedExchange(&g_toggle_mods, mods);
 }
 
-__declspec(dllexport) int catkey_is_running(void) {
+__declspec(dllexport) int vibikey_is_running(void) {
     return g_thread != NULL;
 }
 

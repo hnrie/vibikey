@@ -1,13 +1,13 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Input Method Selection Dialog - Linux Implementation
  * 
  * Uses ncurses for terminal-based dialog
  */
 
-#if defined(CATKEY_LINUX)
+#if defined(VIBIKEY_LINUX)
 
-#include "../catkey_input_method_dialog.h"
+#include "../vibikey_input_method_dialog.h"
 #include "../config.h"
 #include <ncurses.h>
 #include <string.h>
@@ -17,9 +17,9 @@
  * 
  * @return: selected method type, or -1 if cancelled
  */
-int catkey_show_method_dialog(void) {
-    catkey_method_desc_t methods[CATKEY_METHOD_MAX];
-    int count = catkey_get_method_list(methods, CATKEY_METHOD_MAX);
+int vibikey_show_method_dialog(void) {
+    vibikey_method_desc_t methods[VIBIKEY_METHOD_MAX];
+    int count = vibikey_get_method_list(methods, VIBIKEY_METHOD_MAX);
 
     if (count == 0) {
         return -1;
@@ -38,7 +38,7 @@ int catkey_show_method_dialog(void) {
 
     while (!done) {
         clear();
-        mvprintw(1, 2, "CatKey - Select Input Method");
+        mvprintw(1, 2, "VibiKey - Select Input Method");
         mvprintw(2, 2, "Available methods are shown normally, unavailable are greyed (x)");
 
         /* Draw method list */
@@ -108,4 +108,4 @@ int catkey_show_method_dialog(void) {
     return selected;
 }
 
-#endif /* CATKEY_LINUX */
+#endif /* VIBIKEY_LINUX */

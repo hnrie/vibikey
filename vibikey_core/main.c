@@ -1,5 +1,5 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Main entry point
  * 
  * Cross-platform entry for Windows and Linux
@@ -7,25 +7,25 @@
  */
 
 #include "config.h"
-#include "catkey_input_method_dialog.h"
+#include "vibikey_input_method_dialog.h"
 #include <stdio.h>
 #include <string.h>
 
-#if defined(CATKEY_WINDOWS)
-#include "windows/catkey_windows_hook.h"
+#if defined(VIBIKEY_WINDOWS)
+#include "windows/vibikey_windows_hook.h"
 #include <windows.h>
-#elif defined(CATKEY_LINUX)
-#include "linux/catkey_linux_daemon.h"
+#elif defined(VIBIKEY_LINUX)
+#include "linux/vibikey_linux_daemon.h"
 #include <unistd.h>
 #include <signal.h>
 #endif
 
 /* Global config */
-int catkey_backend = CATKEY_BACKEND_PLATFORM;
-int catkey_im_mode = CATKEY_MODE_TEIP;
+int vibikey_backend = VIBIKEY_BACKEND_PLATFORM;
+int vibikey_im_mode = VIBIKEY_MODE_TEIP;
 
 /* Signal handler for clean shutdown */
-#if defined(CATKEY_LINUX)
+#if defined(VIBIKEY_LINUX)
 static volatile int s_running = 1;
 static void signal_handler(int sig) {
     (void)sig;
@@ -38,7 +38,7 @@ static void signal_handler(int sig) {
  */
 static void print_usage(const char *prog) {
     fprintf(stderr,
-        "CatKey - Vietnamese Input Method v%s\n"
+        "VibiKey - Vietnamese Input Method v%s\n"
         "Usage: %s [options]\n"
         "\n"
         "Options:\n"
@@ -53,15 +53,15 @@ static void print_usage(const char *prog) {
         "  inline     Auto-convert while typing\n"
         "  ibus       IBus integration (Linux only)\n"
         "  fcitx      Fcitx integration (Linux only)\n",
-        CATKEY_VERSION_STRING, prog
+        VIBIKEY_VERSION_STRING, prog
     );
 }
 
 /*
  * Parse command line arguments
  */
-static int parse_args(int argc, char *argv[], catkey_method_type_t *method, int *show_dialog) {
-    *method = CATKEY_METHOD_BACKSPACE;
+static int parse_args(int argc, char *argv[], vibikey_method_type_t *method, int *show_dialog) {
+    *method = VIBIKEY_METHOD_BACKSPACE;
     *show_dialog = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -73,10 +73,10 @@ static int parse_args(int argc, char *argv[], catkey_method_type_t *method, int 
             *show_dialog = 1;
         }
         else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--teip") == 0) {
-            catkey_im_mode = CATKEY_MODE_TEIP;
+            vibikey_im_mode = VIBIKEY_MODE_TEIP;
         }
         else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--vni") == 0) {
-            catkey_im_mode = CATKEY_MODE_VNI;
+            vibikey_im_mode = VIBIKEY_MODE_VNI;
         }
         else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--method") == 0) {
             if (i + 1 >= argc) {
@@ -85,13 +85,13 @@ static int parse_args(int argc, char *argv[], catkey_method_type_t *method, int 
             }
             i++;
             if (strcmp(argv[i], "backspace") == 0) {
-                *method = CATKEY_METHOD_BACKSPACE;
+                *method = VIBIKEY_METHOD_BACKSPACE;
             } else if (strcmp(argv[i], "inline") == 0) {
-                *method = CATKEY_METHOD_INLINE;
+                *method = VIBIKEY_METHOD_INLINE;
             } else if (strcmp(argv[i], "ibus") == 0) {
-                *method = CATKEY_METHOD_IBUS;
+                *method = VIBIKEY_METHOD_IBUS;
             } else if (strcmp(argv[i], "fcitx") == 0) {
-                *method = CATKEY_METHOD_FCITX;
+                *method = VIBIKEY_METHOD_FCITX;
             } else {
                 fprintf(stderr, "Error: Unknown method '%s'\n", argv[i]);
                 return -1;
@@ -107,53 +107,53 @@ static int parse_args(int argc, char *argv[], catkey_method_type_t *method, int 
     return 0;
 }
 
-#if defined(CATKEY_WINDOWS)
+#if defined(VIBIKEY_WINDOWS)
 /*
  * Windows entry point (WinMain for GUI, main for console)
  */
 int main(int argc, char *argv[]) {
-    catkey_method_type_t method;
+    vibikey_method_type_t method;
     int show_dialog;
     int ret = parse_args(argc, argv, &method, &show_dialog);
     if (ret != 0) return ret;
 
-    catkey_log(CATKEY_LOG_INFO, "CatKey v%s starting on Windows", CATKEY_VERSION_STRING);
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey v%s starting on Windows", VIBIKEY_VERSION_STRING);
 
     /* Initialize config */
-    catkey_log_set_callback(NULL);  /* Use default stderr logging */
+    vibikey_log_set_callback(NULL);  /* Use default stderr logging */
 
     /* Show method selection dialog if requested */
     if (show_dialog) {
-        catkey_log(CATKEY_LOG_INFO, "Showing method selection dialog");
-        int selected = catkey_show_method_dialog();
+        vibikey_log(VIBIKEY_LOG_INFO, "Showing method selection dialog");
+        int selected = vibikey_show_method_dialog();
         if (selected < 0) {
-            catkey_log(CATKEY_LOG_INFO, "Dialog cancelled, exiting");
+            vibikey_log(VIBIKEY_LOG_INFO, "Dialog cancelled, exiting");
             return 0;
         }
-        method = (catkey_method_type_t)selected;
+        method = (vibikey_method_type_t)selected;
     }
 
     /* Check if method is available */
-    if (!catkey_method_is_available(method)) {
+    if (!vibikey_method_is_available(method)) {
         fprintf(stderr, "Error: Method %d is not available on this platform\n", method);
         return 1;
     }
 
     /* Initialize Windows hooks */
-    if (catkey_windows_init() != 0) {
-        catkey_log(CATKEY_LOG_ERROR, "Failed to initialize Windows hooks");
+    if (vibikey_windows_init() != 0) {
+        vibikey_log(VIBIKEY_LOG_ERROR, "Failed to initialize Windows hooks");
         return 1;
     }
 
     /* Set input mode */
-    catkey_input_mode_t mode;
+    vibikey_input_mode_t mode;
     switch (method) {
-        case CATKEY_METHOD_INLINE: mode = CATKEY_INPUT_INLINE; break;
-        default: mode = CATKEY_INPUT_BACKSPACE; break;
+        case VIBIKEY_METHOD_INLINE: mode = VIBIKEY_INPUT_INLINE; break;
+        default: mode = VIBIKEY_INPUT_BACKSPACE; break;
     }
-    catkey_windows_set_mode(mode);
+    vibikey_windows_set_mode(mode);
 
-    catkey_log(CATKEY_LOG_INFO, "CatKey running. Press hotkeys to switch modes.");
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey running. Press hotkeys to switch modes.");
 
     /* Windows message loop (required for hooks to work) */
     MSG msg;
@@ -163,60 +163,60 @@ int main(int argc, char *argv[]) {
     }
 
     /* Cleanup */
-    catkey_windows_cleanup();
-    catkey_log(CATKEY_LOG_INFO, "CatKey stopped");
+    vibikey_windows_cleanup();
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey stopped");
 
     return 0;
 }
 
-#elif defined(CATKEY_LINUX)
+#elif defined(VIBIKEY_LINUX)
 /*
  * Linux entry point
  */
 int main(int argc, char *argv[]) {
-    catkey_method_type_t method;
+    vibikey_method_type_t method;
     int show_dialog;
     int ret = parse_args(argc, argv, &method, &show_dialog);
     if (ret != 0) return ret;
 
-    catkey_log(CATKEY_LOG_INFO, "CatKey v%s starting on Linux", CATKEY_VERSION_STRING);
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey v%s starting on Linux", VIBIKEY_VERSION_STRING);
 
     /* Show method selection dialog if requested */
     if (show_dialog) {
-        catkey_log(CATKEY_LOG_INFO, "Showing method selection dialog");
-        int selected = catkey_show_method_dialog();
+        vibikey_log(VIBIKEY_LOG_INFO, "Showing method selection dialog");
+        int selected = vibikey_show_method_dialog();
         if (selected < 0) {
-            catkey_log(CATKEY_LOG_INFO, "Dialog cancelled, exiting");
+            vibikey_log(VIBIKEY_LOG_INFO, "Dialog cancelled, exiting");
             return 0;
         }
-        method = (catkey_method_type_t)selected;
+        method = (vibikey_method_type_t)selected;
     }
 
     /* Check if method is available */
-    if (!catkey_method_is_available(method)) {
+    if (!vibikey_method_is_available(method)) {
         fprintf(stderr, "Error: Method %d is not available on this platform\n", method);
         return 1;
     }
 
     /* Initialize Linux daemon */
-    if (catkey_linux_init() != 0) {
-        catkey_log(CATKEY_LOG_ERROR, "Failed to initialize Linux daemon");
+    if (vibikey_linux_init() != 0) {
+        vibikey_log(VIBIKEY_LOG_ERROR, "Failed to initialize Linux daemon");
         return 1;
     }
 
     /* Set input mode */
-    catkey_linux_mode_t mode;
+    vibikey_linux_mode_t mode;
     switch (method) {
-        case CATKEY_METHOD_INLINE: mode = CATKEY_LINUX_INLINE; break;
-        default: mode = CATKEY_LINUX_BACKSPACE; break;
+        case VIBIKEY_METHOD_INLINE: mode = VIBIKEY_LINUX_INLINE; break;
+        default: mode = VIBIKEY_LINUX_BACKSPACE; break;
     }
-    catkey_linux_set_mode(mode);
+    vibikey_linux_set_mode(mode);
 
     /* Set up signal handlers */
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    catkey_log(CATKEY_LOG_INFO, "CatKey running. Press Ctrl+C to stop.");
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey running. Press Ctrl+C to stop.");
 
     /* Main loop - in a real implementation, this would be:
      * - X11 event loop for keyboard filtering
@@ -228,8 +228,8 @@ int main(int argc, char *argv[]) {
     }
 
     /* Cleanup */
-    catkey_linux_cleanup();
-    catkey_log(CATKEY_LOG_INFO, "CatKey stopped");
+    vibikey_linux_cleanup();
+    vibikey_log(VIBIKEY_LOG_INFO, "VibiKey stopped");
 
     return 0;
 }

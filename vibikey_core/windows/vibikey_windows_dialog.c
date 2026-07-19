@@ -1,18 +1,18 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Input Method Selection Dialog - Windows Implementation (Win32)
  * 
  * Uses CreateWindowEx for programmatic UI (no .rc resource file needed)
  */
 
-#if defined(CATKEY_WINDOWS)
+#if defined(VIBIKEY_WINDOWS)
 
-#include "../catkey_input_method_dialog.h"
+#include "../vibikey_input_method_dialog.h"
 #include "../config.h"
 #include <windows.h>
 
 /* Window class name */
-#define CATKEY_DIALOG_CLASS L"CatKeyMethodDialog"
+#define VIBIKEY_DIALOG_CLASS L"VibiKeyMethodDialog"
 
 /* Control IDs */
 #define IDC_LISTBOX    1001
@@ -21,7 +21,7 @@
 #define IDC_CANCEL     1004
 
 /* Dialog state */
-static catkey_method_desc_t *s_methods = NULL;
+static vibikey_method_desc_t *s_methods = NULL;
 static int s_method_count = 0;
 static int s_selected = -1;
 static HWND s_hwndDialog = NULL;
@@ -144,9 +144,9 @@ static LRESULT CALLBACK dialog_wndproc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 /*
  * Show the method selection dialog
  */
-int catkey_show_method_dialog(void) {
-    catkey_method_desc_t methods[CATKEY_METHOD_MAX];
-    int count = catkey_get_method_list(methods, CATKEY_METHOD_MAX);
+int vibikey_show_method_dialog(void) {
+    vibikey_method_desc_t methods[VIBIKEY_METHOD_MAX];
+    int count = vibikey_get_method_list(methods, VIBIKEY_METHOD_MAX);
 
     if (count == 0) {
         return -1;
@@ -164,7 +164,7 @@ int catkey_show_method_dialog(void) {
     wc.hInstance = GetModuleHandle(NULL);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
-    wc.lpszClassName = CATKEY_DIALOG_CLASS;
+    wc.lpszClassName = VIBIKEY_DIALOG_CLASS;
 
     if (!RegisterClassExW(&wc)) {
         return -1;
@@ -181,15 +181,15 @@ int catkey_show_method_dialog(void) {
     /* Create window */
     s_hwndDialog = CreateWindowExW(
         0,
-        CATKEY_DIALOG_CLASS,
-        L"CatKey - Select Input Method",
+        VIBIKEY_DIALOG_CLASS,
+        L"VibiKey - Select Input Method",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
         dlg_x, dlg_y, dlg_w, dlg_h,
         NULL, NULL, GetModuleHandle(NULL), NULL
     );
 
     if (!s_hwndDialog) {
-        UnregisterClassW(CATKEY_DIALOG_CLASS, GetModuleHandle(NULL));
+        UnregisterClassW(VIBIKEY_DIALOG_CLASS, GetModuleHandle(NULL));
         return -1;
     }
 
@@ -206,9 +206,9 @@ int catkey_show_method_dialog(void) {
         DispatchMessageW(&msg);
     }
 
-    UnregisterClassW(CATKEY_DIALOG_CLASS, GetModuleHandle(NULL));
+    UnregisterClassW(VIBIKEY_DIALOG_CLASS, GetModuleHandle(NULL));
 
     return s_selected;
 }
 
-#endif /* CATKEY_WINDOWS */
+#endif /* VIBIKEY_WINDOWS */
