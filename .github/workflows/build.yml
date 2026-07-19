@@ -138,7 +138,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
           python3 - <<'PYEOF'
-          import json, os, urllib.request
+          import json, os, re, urllib.error, urllib.request
 
           context = open("release-notes/CONTEXT.md", encoding="utf-8").read()
           context = context[:150_000]  # MiMo-V2.5 has a 200k context window
@@ -165,27 +165,52 @@ jobs:
               "messages": [{"role": "user", "content": prompt}],
           }).encode()
 
-          headers = {"content-type": "application/json"}
-          api_key = os.environ.get("OPENCODE_API_KEY", "")
+          def fallback_notes(source):
+              """Produce useful notes even when the optional AI service is unavailable."""
+              commits = []
+              in_commit_log = False
+              for line in source.splitlines():
+                  if line.startswith("## Commit log"):
+                      in_commit_log = True
+                      continue
+                  if line.startswith("## ") and in_commit_log:
+                      break
+                  if in_commit_log and line.startswith("- "):
+                      # Remove the hash/author while retaining the actual change summary.
+                      item = re.sub(r"^- [0-9a-f]+ ", "", line)
+                      item = re.sub(r" \\([^)]+\\)$", "", item)
+                      commits.append(item)
+              if not commits:
+                  return "No user-facing changes were detected."
+              return ("This release includes the changes listed below.\n\n"
+                      "### Other changes\n" + "\n".join(commits))
+
+          text = ""
+          api_key = os.environ.get("OPENCODE_API_KEY", "").strip()
           if api_key:
-              headers["authorization"] = f"Bearer {api_key}"
-
-          req = urllib.request.Request(
-              "https://opencode.ai/zen/v1/chat/completions",
-              data=body,
-              headers=headers,
-          )
-          with urllib.request.urlopen(req) as resp:
-              data = json.load(resp)
-
-          text = (
-              data.get("choices", [{}])[0]
-                  .get("message", {})
-                  .get("content", "")
-          ).strip() or "_No changes detected._"
+              headers = {
+                  "content-type": "application/json",
+                  "authorization": f"Bearer {api_key}",
+                  "user-agent": "VibiKey-GitHub-Actions/1.0",
+              }
+              req = urllib.request.Request(
+                  "https://opencode.ai/zen/v1/chat/completions",
+                  data=body,
+                  headers=headers,
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as resp:
+                      data = json.load(resp)
+                  text = (data.get("choices", [{}])[0]
+                              .get("message", {})
+                              .get("content", "")).strip()
+              except (urllib.error.URLError, TimeoutError, ValueError, KeyError) as exc:
+                  print(f"AI release-note generation unavailable ({exc}); using fallback.")
+          else:
+              print("OPENCODE_API_KEY is not configured; using deterministic fallback.")
 
           with open("release-notes/BODY.md", "w", encoding="utf-8") as f:
-              f.write(text + "\n")
+              f.write((text or fallback_notes(context)).strip() + "\n")
           PYEOF
 
       - name: Upload release notes
@@ -196,8 +221,11 @@ jobs:
 
   release:
     name: Release assets
+    if: github.event_name != 'pull_request'
     needs: [windows, linux, release-notes]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v5
         with:
