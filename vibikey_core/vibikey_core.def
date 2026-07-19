@@ -1,0 +1,12 @@
+LIBRARY vibikey_core
+EXPORTS
+    vibikey_process_input
+    vibikey_convert_word
+    vibikey_modifier_pressed
+    vibikey_start
+    vibikey_stop
+    vibikey_set_enabled
+    vibikey_get_enabled
+    vibikey_set_method
+    vibikey_set_toggle_key
+    vibikey_is_running

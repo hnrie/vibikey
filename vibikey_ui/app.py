@@ -1,9 +1,9 @@
 """
-CatKey - Vietnamese Input Method
-PySide6 UI - a clone of the EVKey settings interface, with CatKey extras.
+VibiKey - Vietnamese Input Method
+PySide6 UI - a clone of the EVKey settings interface, with VibiKey extras.
 
-Architecture: all Vietnamese conversion happens in the C core (catkey_core
-DLL/so) accessed via catkey_ui.core. This module is UI/UX only.
+Architecture: all Vietnamese conversion happens in the C core (vibikey_core
+DLL/so) accessed via vibikey_ui.core. This module is UI/UX only.
 """
 
 import sys
@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
             (self._tab_shortkeys(), "Shortkeys"),
             (self._tab_macro(), "Macro"),
             (self._tab_exceptions(), "Exceptions"),
-            (self._tab_catkey(), "CatKey"),
+            (self._tab_vibikey(), "VibiKey"),
             (self._tab_about(), "About"),
         ]
         for widget, title in self._tabs_meta:
@@ -237,7 +237,7 @@ class MainWindow(QMainWindow):
 
         system = self._track(QGroupBox(), "System", "setTitle")
         yb = QVBoxLayout(system)
-        yb.addWidget(self._chk("auto_run_boot", "Auto-run CatKey at boot time"))
+        yb.addWidget(self._chk("auto_run_boot", "Auto-run VibiKey at boot time"))
         yb.addWidget(self._chk("run_as_admin", "Run as Administrator on startup"))
         yb.addWidget(self._chk("show_dialog_startup", "Show this dialog box at startup"))
         yb.addWidget(self._chk("notification_sounds", "Turn on/off notification sounds"))
@@ -310,12 +310,12 @@ class MainWindow(QMainWindow):
         lay.addWidget(self._chk("auto_prevent_vietnamese", "Auto prevent Vietnamese typing"))
         return w
 
-    def _tab_catkey(self) -> QWidget:
-        """CatKey-specific extras kept separate from EVKey parity."""
+    def _tab_vibikey(self) -> QWidget:
+        """VibiKey-specific extras kept separate from EVKey parity."""
         w = QWidget()
         lay = QVBoxLayout(w)
 
-        backend = QGroupBox("Platform Backend (CatKey)")
+        backend = QGroupBox("Platform Backend (VibiKey)")
         bl = QVBoxLayout(backend)
         note = QLabel("Backends unavailable on your platform are greyed out.")
         note.setStyleSheet("color:#888;")
@@ -386,7 +386,7 @@ class MainWindow(QMainWindow):
         self.exc_list.clear()
         self.exc_list.addItems(c.get("exception_apps", []))
 
-        ck = c.get("catkey", {})
+        ck = c.get("vibikey", {})
         for i in range(self.backend_list.count()):
             if self.backend_list.item(i).data(Qt.UserRole) == ck.get("method"):
                 self.backend_list.setCurrentRow(i)
@@ -407,7 +407,7 @@ class MainWindow(QMainWindow):
                                for i in range(self.exc_list.count())]
         item = self.backend_list.currentItem()
         if item is not None and is_method_available(item.data(Qt.UserRole)):
-            c.setdefault("catkey", {})["method"] = item.data(Qt.UserRole)
+            c.setdefault("vibikey", {})["method"] = item.data(Qt.UserRole)
         return c
 
     def _apply(self):
@@ -451,7 +451,7 @@ class MainWindow(QMainWindow):
 
     def _retranslate(self):
         """Re-apply all UI text in the current language."""
-        self.setWindowTitle(_("CatKey - Vietnamese Keyboard"))
+        self.setWindowTitle(_("VibiKey - Vietnamese Keyboard"))
         # Language button shows the language you can switch TO.
         self.btn_lang.setText("Tiếng Việt" if current_language() == LANG_EN
                               else "English")
@@ -489,8 +489,8 @@ class MainWindow(QMainWindow):
     def _request_exit(self):
         from PySide6.QtWidgets import QMessageBox
         r = QMessageBox.question(
-            self, "Exit CatKey",
-            "Quit CatKey completely? Vietnamese typing will stop.",
+            self, "Exit VibiKey",
+            "Quit VibiKey completely? Vietnamese typing will stop.",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
         )
         if r == QMessageBox.Yes:
@@ -510,7 +510,7 @@ class _HotkeyBridge(QObject):
     triggered = Signal()
 
 
-class CatKeyApp:
+class VibiKeyApp:
     # Two left-clicks within this window (ms) open the UI; otherwise toggle.
     DBLCLICK_MS = 1000
 
@@ -522,7 +522,7 @@ class CatKeyApp:
 
         # Single-instance guard: prevents a second process from installing a
         # second keyboard hook (which caused doubled/tripled keystrokes).
-        self._single = QSharedMemory("CatKey_SingleInstance_v1")
+        self._single = QSharedMemory("VibiKey_SingleInstance_v1")
         if self._single.attach():
             # Already running elsewhere.
             self._is_primary = False
@@ -536,7 +536,7 @@ class CatKeyApp:
 
         self._build_tray()
 
-        # Start the system-wide typing engine so CatKey works in other apps.
+        # Start the system-wide typing engine so VibiKey works in other apps.
         if hook_available():
             hook_start()
             self._apply_hook_state()
@@ -651,7 +651,7 @@ class CatKeyApp:
         menu.addAction(act_macro_toggle)
 
         menu.addSeparator()
-        act_show = QAction(_("Show CatKey dialog"), self.app)
+        act_show = QAction(_("Show VibiKey dialog"), self.app)
         act_show.triggered.connect(self._show_window)
         menu.addAction(act_show)
 
@@ -750,10 +750,10 @@ class CatKeyApp:
         from PySide6.QtWidgets import QMessageBox
         QMessageBox.warning(
             self.window, "Conflicting Vietnamese input tool",
-            f"CatKey detected another Vietnamese input tool running:\n\n"
+            f"VibiKey detected another Vietnamese input tool running:\n\n"
             f"    {names}\n\n"
             "Running two Vietnamese IMEs at once will garble your typing. "
-            "Please turn off the other tool, then use CatKey.",
+            "Please turn off the other tool, then use VibiKey.",
         )
 
     def _quit(self):

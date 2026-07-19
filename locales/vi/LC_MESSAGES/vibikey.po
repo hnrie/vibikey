@@ -1,14 +1,14 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: CatKey 1.0.0\n"
+"Project-Id-Version: VibiKey 1.0.0\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 # Window / buttons
-msgid "CatKey - Vietnamese Keyboard"
-msgstr "CatKey - Bàn phím Tiếng Việt"
+msgid "VibiKey - Vietnamese Keyboard"
+msgstr "VibiKey - Bàn phím Tiếng Việt"
 
 msgid "Tiếng Việt"
 msgstr "English"
@@ -94,8 +94,8 @@ msgstr "Sửa Tiếng Việt trên thanh địa chỉ trình duyệt / Excel"
 msgid "System"
 msgstr "Hệ thống"
 
-msgid "Auto-run CatKey at boot time"
-msgstr "Tự khởi động CatKey cùng máy"
+msgid "Auto-run VibiKey at boot time"
+msgstr "Tự khởi động VibiKey cùng máy"
 
 msgid "Run as Administrator on startup"
 msgstr "Chạy với quyền Administrator"
@@ -167,8 +167,8 @@ msgstr "Bảng macro...  (F8)"
 msgid "On/Off Macro  (F9)"
 msgstr "Bật/Tắt Macro  (F9)"
 
-msgid "Show CatKey dialog"
-msgstr "Hiện cửa sổ CatKey"
+msgid "Show VibiKey dialog"
+msgstr "Hiện cửa sổ VibiKey"
 
 msgid "Exit"
 msgstr "Thoát"
@@ -193,22 +193,22 @@ msgstr "Đã TẮT gõ Tiếng Việt"
 
 msgid "Notify when Vietnamese typing is turned on or off"
 msgstr "Thông báo khi bật/tắt gõ Tiếng Việt"
-#: catkey_ui/app.py
+#: vibikey_ui/app.py
 msgid "Spelling checks are not wired yet (alpha)."
 msgstr "Tính năng kiểm tra chính tả chưa có (alpha)."
 
-#: catkey_ui/app.py
+#: vibikey_ui/app.py
 msgid "Compatibility options are not wired yet (alpha)."
 msgstr "Tùy chọn tương thích chưa có (alpha)."
 
-#: catkey_ui/app.py
+#: vibikey_ui/app.py
 msgid "Restore/Reset shortkeys are not wired yet (alpha). Switch works via pynput."
 msgstr "Phím tắt khôi phục/đặt lại chưa có (alpha). Phím chuyển đổi hoạt động qua pynput."
 
-#: catkey_ui/app.py
+#: vibikey_ui/app.py
 msgid "Macros are not wired yet (alpha)."
 msgstr "Macro chưa có (alpha)."
 
-#: catkey_ui/app.py
+#: vibikey_ui/app.py
 msgid "Auto-run / Auto-update / Dialog at startup are not wired yet (alpha)."
 msgstr "Tự động chạy / cập nhật / hiện hộp thoại khi khởi động chưa có (alpha)."

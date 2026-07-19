@@ -1,5 +1,5 @@
 """
-CatKey - detect other Vietnamese input tools running in the background.
+VibiKey - detect other Vietnamese input tools running in the background.
 
 Pure stdlib (no psutil dependency). On Windows uses `tasklist`, on Linux
 uses /proc. Returns friendly names of any conflicting IME processes so the
@@ -33,7 +33,7 @@ KNOWN_TOOLS = {
 }
 
 # Our own process names to ignore.
-_SELF = {"python.exe", "pythonw.exe", "catkey.exe", "catkey_msvc.exe"}
+_SELF = {"python.exe", "pythonw.exe", "vibikey.exe", "vibikey_msvc.exe"}
 
 
 def _running_process_names_windows():

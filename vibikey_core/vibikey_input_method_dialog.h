@@ -1,13 +1,13 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Input Method Selection Dialog
  * 
  * Shows available input methods for the current platform.
  * Unavailable methods are greyed out with "Unavailable for your platform"
  */
 
-#ifndef CATKEY_INPUT_METHOD_DIALOG_H
-#define CATKEY_INPUT_METHOD_DIALOG_H
+#ifndef VIBIKEY_INPUT_METHOD_DIALOG_H
+#define VIBIKEY_INPUT_METHOD_DIALOG_H
 
 #include <stdint.h>
 
@@ -17,25 +17,25 @@ extern "C" {
 
 /* Input method types */
 typedef enum {
-    CATKEY_METHOD_BACKSPACE = 0,   /* Backspace method (all platforms) */
-    CATKEY_METHOD_INLINE,          /* Inline method (all platforms) */
-    CATKEY_METHOD_IBUS,            /* IBus (Linux only) */
-    CATKEY_METHOD_FCITX,           /* Fcitx (Linux only) */
-    CATKEY_METHOD_MAX
-} catkey_method_type_t;
+    VIBIKEY_METHOD_BACKSPACE = 0,   /* Backspace method (all platforms) */
+    VIBIKEY_METHOD_INLINE,          /* Inline method (all platforms) */
+    VIBIKEY_METHOD_IBUS,            /* IBus (Linux only) */
+    VIBIKEY_METHOD_FCITX,           /* Fcitx (Linux only) */
+    VIBIKEY_METHOD_MAX
+} vibikey_method_type_t;
 
 /* Platform flags */
-#define CATKEY_PLATFORM_WINDOWS_FLAG   0x01
-#define CATKEY_PLATFORM_LINUX_FLAG     0x02
+#define VIBIKEY_PLATFORM_WINDOWS_FLAG   0x01
+#define VIBIKEY_PLATFORM_LINUX_FLAG     0x02
 
 /* Method descriptor */
-typedef struct catkey_method_desc {
-    catkey_method_type_t type;
+typedef struct vibikey_method_desc {
+    vibikey_method_type_t type;
     const char *name;
     const char *description;
     uint32_t supported_platforms;
     int is_available;       /* 1 if available on current platform */
-} catkey_method_desc_t;
+} vibikey_method_desc_t;
 
 /*
  * Get list of all input methods
@@ -44,32 +44,32 @@ typedef struct catkey_method_desc {
  * @param max_count: size of array
  * @return: number of methods filled
  */
-int catkey_get_method_list(catkey_method_desc_t *methods, int max_count);
+int vibikey_get_method_list(vibikey_method_desc_t *methods, int max_count);
 
 /*
  * Check if a method is available on current platform
  */
-int catkey_method_is_available(catkey_method_type_t type);
+int vibikey_method_is_available(vibikey_method_type_t type);
 
 /*
  * Show the method selection dialog
  * 
  * @return: selected method type, or -1 if cancelled
  */
-int catkey_show_method_dialog(void);
+int vibikey_show_method_dialog(void);
 
 /*
  * Initialize dialog subsystem
  */
-int catkey_dialog_init(void);
+int vibikey_dialog_init(void);
 
 /*
  * Cleanup dialog subsystem
  */
-int catkey_dialog_cleanup(void);
+int vibikey_dialog_cleanup(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CATKEY_INPUT_METHOD_DIALOG_H */
+#endif /* VIBIKEY_INPUT_METHOD_DIALOG_H */

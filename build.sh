@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build CatKey into a standalone executable using PyInstaller or Nuitka.
+# Build VibiKey into a standalone executable using PyInstaller or Nuitka.
 #
 # Usage:
 #   ./build.sh                     # PyInstaller, onedir (default)
@@ -17,16 +17,16 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NAME="CatKey"
+NAME="VibiKey"
 ENTRY="$ROOT/run_ui.py"
-CORE_DIR="$ROOT/catkey_core"
+CORE_DIR="$ROOT/vibikey_core"
 LOCALES="$ROOT/locales"
 
 show_help() {
     cat <<EOF
 Usage: $0 [options]
 
-Build CatKey into a standalone executable using PyInstaller or Nuitka.
+Build VibiKey into a standalone executable using PyInstaller or Nuitka.
 
 Options:
   -t, --tool pyinstaller|nuitka  Packaging backend (default: pyinstaller)
@@ -41,8 +41,8 @@ Options:
   -h, --help                  Show this help and exit
 
 Output:
-  dist/CatKey-<arch>-<compiler>/   PyInstaller onedir
-  dist/CatKey-<arch>-<compiler>.exe (Windows onefile)
+  dist/VibiKey-<arch>-<compiler>/   PyInstaller onedir
+  dist/VibiKey-<arch>-<compiler>.exe (Windows onefile)
   dist/<arch>-<compiler>/run_ui.dist/  Nuitka standalone
 
 Requirements:
@@ -87,11 +87,11 @@ if [ "$CLEAN" -eq 1 ]; then clean_artifacts; echo "Cleaned."; exit 0; fi
 # The native core must exist so it can be bundled. Build it directly with
 # the system compiler (no Python/PySide6 import needed).
 if [ "$(uname)" = "Darwin" ]; then
-    CORE_LIB="$CORE_DIR/libcatkey_core.dylib"
+    CORE_LIB="$CORE_DIR/libvibikey_core.dylib"
 elif [ "$(uname)" = "Linux" ]; then
-    CORE_LIB="$CORE_DIR/libcatkey_core.so"
+    CORE_LIB="$CORE_DIR/libvibikey_core.so"
 else
-    CORE_LIB="$CORE_DIR/catkey_core.dll"
+    CORE_LIB="$CORE_DIR/vibikey_core.dll"
 fi
 
 if [ ! -f "$CORE_LIB" ]; then
@@ -100,7 +100,7 @@ if [ ! -f "$CORE_LIB" ]; then
     MFLAG=""
     if [ "$ARCH" = "x86" ]; then MFLAG="-m32"; fi
     if [ "$(uname)" = "Linux" ]; then
-        # Match catkey_ui/core.py: the Linux .so is the conversion engine only
+        # Match vibikey_ui/core.py: the Linux .so is the conversion engine only
         # (the X11 daemon is a separate program, not loaded by the app).
         CC="$COMPILER"
         "$CC" -shared -fPIC -O2 $MFLAG -o "$CORE_LIB" \
@@ -130,7 +130,7 @@ find "$CORE_DIR" -maxdepth 1 -type f \( -name '*.so' -o -name '*.dylib' -o -name
 if [ "$TOOL" = "pyinstaller" ]; then
     "$PYTHON" -m pip install --quiet --upgrade pyinstaller
     ARGS=(-m PyInstaller --noconfirm --clean --name "$NAME-$SUFFIX" --windowed
-          --add-data "$STAGE:catkey_core"
+          --add-data "$STAGE:vibikey_core"
           --add-data "$LOCALES:locales")
     if [ "$ONEFILE" -eq 1 ]; then ARGS+=(--onefile); else ARGS+=(--onedir); fi
     ARGS+=("$ENTRY")
@@ -145,7 +145,7 @@ elif [ "$TOOL" = "nuitka" ]; then
     # native lib explicitly as a data file (ctypes loads it at runtime).
     NUITKA_LIBS=()
     for f in "$STAGE"/*; do
-        [ -e "$f" ] && NUITKA_LIBS+=("--include-data-files=$f=catkey_core/$(basename "$f")")
+        [ -e "$f" ] && NUITKA_LIBS+=("--include-data-files=$f=vibikey_core/$(basename "$f")")
     done
     "$PYTHON" -m nuitka "$MODE" $NARCH \
         --enable-plugin=pyside6 \

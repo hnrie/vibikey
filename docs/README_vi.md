@@ -1,4 +1,4 @@
-# CatKey
+# VibiKey
 
 Bộ gõ tiếng Việt miễn phí, mã nguồn mở, với giao diện giống EVKey.
 
@@ -14,8 +14,8 @@ Bộ gõ tiếng Việt miễn phí, mã nguồn mở, với giao diện giống
 
 ## Vì sao phải kiểm chứng bản build trước khi tin dùng
 
-**Chỉ chạy những bản CatKey mà bạn có thể kiểm chứng.** Đây là khuyến nghị
-của cộng đồng (không phải điều khoản giấy phép — CatKey dùng GPLv3, cho phép
+**Chỉ chạy những bản VibiKey mà bạn có thể kiểm chứng.** Đây là khuyến nghị
+của cộng đồng (không phải điều khoản giấy phép — VibiKey dùng GPLv3, cho phép
 mọi hình thức phân phối kể cả thương mại): chúng tôi khuyến cáo không phát
 hành bản nhị phân bị làm rối (obfuscated) hoặc bị nén/đóng gói (packed), và
 mong bản build có thể được kiểm chứng độc lập trước khi chia sẻ.
@@ -27,10 +27,10 @@ mềm không mong muốn / có thể chứa mã độc, và **không có chữ k
 lệ**. Vì bộ gõ nhìn thấy mọi phím bạn nhấn, một bản bị chỉnh sửa là cực
 kỳ nguy hiểm.
 
-Khuyến nghị của CatKey: bản chia sẻ nên đến từ mã nguồn đã công bố, build
+Khuyến nghị của VibiKey: bản chia sẻ nên đến từ mã nguồn đã công bố, build
 lại được (reproducible), kèm mã băm (checksum), và tốt nhất là được ít
 nhất một bên độc lập build lại để đối chiếu trước khi cho tải về. Nếu một
-bản CatKey bị đóng gói/nén, không có chữ ký, hoặc bạn không đối chiếu được
+bản VibiKey bị đóng gói/nén, không có chữ ký, hoặc bạn không đối chiếu được
 mã băm với bản build từ mã nguồn — **đừng chạy nó.**
 
 ---
@@ -46,7 +46,7 @@ pip install PySide6-Essentials pynput
 python run_ui.py
 ```
 
-Lõi C (`catkey_core.dll` / `libcatkey_core.so`) sẽ được tự động build
+Lõi C (`vibikey_core.dll` / `libvibikey_core.so`) sẽ được tự động build
 trong lần chạy đầu tiên nếu có trình biên dịch.
 
 ## Tính năng
@@ -74,17 +74,17 @@ chứng trong [`../LICENSE`](../LICENSE).
 
 ## Giấy phép
 
-CatKey được cấp phép theo **Giấy phép Công cộng GNU phiên bản 3 (GPLv3)**
+VibiKey được cấp phép theo **Giấy phép Công cộng GNU phiên bản 3 (GPLv3)**
 hoặc phiên bản mới hơn. Xem [`../LICENSE`](../LICENSE).
 
-**Tại sao là GPLv3:** CatKey chứa mã đảo ngược từ EVKey, vốn dựa trên
-**UniKey**. UniKey phát hành dưới GPL, nên CatKey — với tư cách là tác phẩm
+**Tại sao là GPLv3:** VibiKey chứa mã đảo ngược từ EVKey, vốn dựa trên
+**UniKey**. UniKey phát hành dưới GPL, nên VibiKey — với tư cách là tác phẩm
 phái sinh — cũng phải dùng GPL. (Xem ghi chú trong `LICENSE`.) Điều này
-cũng có nghĩa mã nguồn CatKey luôn phải công khai; hãy giữ bản build có thể
+cũng có nghĩa mã nguồn VibiKey luôn phải công khai; hãy giữ bản build có thể
 tái tạo và đi kèm mã nguồn khi chia sẻ.
 
 **Bản sửa đổi (điều khoản bổ sung theo GPLv3 §7):** nếu bạn phân phối bản
 sửa đổi, bạn phải đổi tên, đổi logo/biểu tượng và đánh dấu rõ là khác với
-bản gốc. Bạn không được dùng tên hay logo "CatKey" hoặc "BlackCatOfficial"
+bản gốc. Bạn không được dùng tên hay logo "VibiKey" hoặc "BlackCatOfficial"
 để gắn nhãn/quảng bá bản sửa đổi hay sản phẩm phái sinh khi chưa được cho
 phép bằng văn bản. Xem [`../LICENSE`](../LICENSE).

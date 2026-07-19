@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Build CatKey into a standalone executable using PyInstaller or Nuitka.
+    Build VibiKey into a standalone executable using PyInstaller or Nuitka.
 
 .DESCRIPTION
-    Builds the native C core (catkey_core.dll) for the requested arch/compiler,
+    Builds the native C core (vibikey_core.dll) for the requested arch/compiler,
     stages it, then packages the PySide6 app via PyInstaller (onedir/onefile)
     or Nuitka (standalone/onefile). Output is placed under dist/ and suffixed
     by arch and compiler so matrix builds don't collide.
@@ -49,9 +49,9 @@ if ($Help) {
 
 $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
-$Name = 'CatKey'
+$Name = 'VibiKey'
 $Entry = Join-Path $Root 'run_ui.py'
-$CoreDir = Join-Path $Root 'catkey_core'
+$CoreDir = Join-Path $Root 'vibikey_core'
 $Locales = Join-Path $Root 'locales'
 
 # Prefer the project venv's python if not overridden.
@@ -71,10 +71,10 @@ function Remove-Artifacts {
 if ($Clean) { Remove-Artifacts; Write-Host 'Cleaned.' -ForegroundColor Green; exit 0 }
 
 # --- Build the native core for the requested arch/compiler ---------------
-$Dll = Join-Path $CoreDir 'catkey_core.dll'
-$srcs = @((Join-Path $CoreDir 'vietnamese_tep.c'), (Join-Path $CoreDir 'windows' 'catkey_hook.c'))
+$Dll = Join-Path $CoreDir 'vibikey_core.dll'
+$srcs = @((Join-Path $CoreDir 'vietnamese_tep.c'), (Join-Path $CoreDir 'windows' 'vibikey_hook.c'))
 if (-not (Test-Path $Dll)) {
-    Write-Host "Building catkey_core.dll ($Arch/$Compiler)..." -ForegroundColor Yellow
+    Write-Host "Building vibikey_core.dll ($Arch/$Compiler)..." -ForegroundColor Yellow
     if ($Compiler -eq 'msvc') {
         $vc = switch ($Arch) {
             'x86'    { 'vcvars32.bat' }
@@ -85,7 +85,7 @@ if (-not (Test-Path $Dll)) {
             "C:\Program Files (x86)\Microsoft Visual Studio", "E:\Visual Studio" `
             -Filter $vc -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
         if (-not $vcvars) { throw "MSVC $vc not found." }
-        $deff = Join-Path $CoreDir 'catkey_core.def'
+        $deff = Join-Path $CoreDir 'vibikey_core.def'
         $cmd = ('"{0}" && cl /nologo /w /std:c17 /utf-8 /LD /Fe:"{1}" {2} /link /DEF:"{3}" user32.lib' `
                 -f $vcvars, $Dll, (($srcs | ForEach-Object { "`"$_`"" }) -join ' '), $deff)
         cmd /c $cmd | Out-Null
@@ -107,7 +107,7 @@ if (-not (Test-Path $Dll)) {
                 $rel = [System.IO.Path]::GetRelativePath($CoreDir, $_) -replace '\\','/'
                 '"{0}"' -f $rel
             }) -join ' '
-            $cmd = "$cc -shared -O2 -o `"$Dll`" $relSrcs catkey_core.def -Wl,--kill-at -luser32"
+            $cmd = "$cc -shared -O2 -o `"$Dll`" $relSrcs vibikey_core.def -Wl,--kill-at -luser32"
             & cmd /c $cmd 2>&1 | Write-Host
             if ($LASTEXITCODE -ne 0) { throw "MinGW ($Arch) build failed (exit $LASTEXITCODE)." }
         } finally {
@@ -122,8 +122,8 @@ if (-not (Test-Path $Dll)) {
 import ctypes, sys
 try:
     lib = ctypes.CDLL(r'$Dll')
-    _ = lib.catkey_convert_word
-    print('export OK: catkey_convert_word')
+    _ = lib.vibikey_convert_word
+    print('export OK: vibikey_convert_word')
 except Exception as e:
     print('EXPORT CHECK FAILED:', e, file=sys.stderr); sys.exit(1)
 "@
@@ -136,7 +136,7 @@ $Suffix = "$Arch-$Compiler"
 Remove-Artifacts
 
 # Stage only the built native libraries (not C sources) for bundling.
-$Stage = Join-Path $env:TEMP "catkey_core_stage"
+$Stage = Join-Path $env:TEMP "vibikey_core_stage"
 if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
 New-Item -ItemType Directory -Path $Stage | Out-Null
 $libs = Get-ChildItem $CoreDir -File | Where-Object { $_.Extension -in '.dll', '.so', '.dylib' }
@@ -149,7 +149,7 @@ if ($Tool -eq 'pyinstaller') {
     $args = @(
         '-m', 'PyInstaller', '--noconfirm', '--clean',
         '--name', "$Name-$Suffix", '--windowed',
-        '--add-data', "$Stage;catkey_core",
+        '--add-data', "$Stage;vibikey_core",
         '--add-data', "$Locales;locales"
     )
     $args += $OneFile ? '--onefile' : '--onedir'
@@ -174,7 +174,7 @@ else {
     # Nuitka's --include-data-dir skips *.dll; force each native lib in as a
     # data file so ctypes can load it at runtime (no compiler on user's box).
     foreach ($lib in $libs) {
-        $args += "--include-data-files=$($lib.FullName)=catkey_core/$($lib.Name)"
+        $args += "--include-data-files=$($lib.FullName)=vibikey_core/$($lib.Name)"
     }
     $args += $Entry
     & $Python @args

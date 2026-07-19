@@ -1,4 +1,4 @@
-# CatKey - Vietnamese Input Method
+# VibiKey - Vietnamese Input Method
 # Cross-platform Makefile
 #
 # Targets:
@@ -15,18 +15,18 @@ CC ?= gcc
 MSVC ?= cl.exe
 
 # Common source files
-COMMON_SRCS = config.c vietnamese_tep.c catkey_input_method_dialog.c
+COMMON_SRCS = config.c vietnamese_tep.c vibikey_input_method_dialog.c
 COMMON_OBJS = $(COMMON_SRCS:.c=.o)
 
 # Output
-TARGET = catkey
+TARGET = vibikey
 
 .PHONY: all linux windows clean test help
 
 all: linux
 
 help:
-	@echo "CatKey - Vietnamese Input Method"
+	@echo "VibiKey - Vietnamese Input Method"
 	@echo ""
 	@echo "Targets:"
 	@echo "  make              - Build for current platform (Linux)"
@@ -40,7 +40,7 @@ help:
 # Linux build
 # ============================================================================
 
-linux: CFLAGS += -DCATKEY_LINUX -Wall -Wextra -O2 -std=c11
+linux: CFLAGS += -DVIBIKEY_LINUX -Wall -Wextra -O2 -std=c11
 linux: LDFLAGS += -lX11 -lncurses
 linux: $(TARGET)
 
@@ -49,7 +49,7 @@ linux: $(TARGET)
 # ============================================================================
 
 windows: CC = x86_64-w64-mingw32-gcc
-windows: CFLAGS += -DCATKEY_WINDOWS -Wall -Wextra -O2 -std=c11 -mwindows
+windows: CFLAGS += -DVIBIKEY_WINDOWS -Wall -Wextra -O2 -std=c11 -mwindows
 windows: LDFLAGS += -luser32 -lgdi32 -lkernel32
 windows: $(TARGET).exe
 
@@ -58,7 +58,7 @@ windows: $(TARGET).exe
 # ============================================================================
 
 windows-msvc: CC = $(MSVC)
-windows-msvc: CFLAGS = /nologo /DCATKEY_WINDOWS /W3 /O2 /std:c11
+windows-msvc: CFLAGS = /nologo /DVIBIKEY_WINDOWS /W3 /O2 /std:c11
 windows-msvc: LDFLAGS = /nologo user32.lib gdi32.lib kernel32.lib
 windows-msvc: $(TARGET)_msvc.exe
 
@@ -73,24 +73,24 @@ config.o: config.c config.h
 vietnamese_tep.o: vietnamese_tep.c vietnamese_tep.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-catkey_input_method_dialog.o: catkey_input_method_dialog.c catkey_input_method_dialog.h config.h
+vibikey_input_method_dialog.o: vibikey_input_method_dialog.c vibikey_input_method_dialog.h config.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Platform-specific objects
-catkey_linux_daemon.o: linux/catkey_linux_daemon.c linux/catkey_linux_daemon.h
+vibikey_linux_daemon.o: linux/vibikey_linux_daemon.c linux/vibikey_linux_daemon.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-catkey_linux_dialog.o: linux/catkey_linux_dialog.c catkey_input_method_dialog.h
+vibikey_linux_dialog.o: linux/vibikey_linux_dialog.c vibikey_input_method_dialog.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-catkey_windows_hook.o: windows/catkey_windows_hook.c windows/catkey_windows_hook.h
+vibikey_windows_hook.o: windows/vibikey_windows_hook.c windows/vibikey_windows_hook.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-catkey_windows_dialog.o: windows/catkey_windows_dialog.c catkey_input_method_dialog.h
+vibikey_windows_dialog.o: windows/vibikey_windows_dialog.c vibikey_input_method_dialog.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 # Main objects
-main.o: main.c config.h catkey_input_method_dialog.h
+main.o: main.c config.h vibikey_input_method_dialog.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 # ============================================================================
@@ -98,21 +98,21 @@ main.o: main.c config.h catkey_input_method_dialog.h
 # ============================================================================
 
 # Linux objects
-LINUX_OBJS = main.o $(COMMON_OBJS) catkey_linux_daemon.o catkey_linux_dialog.o
+LINUX_OBJS = main.o $(COMMON_OBJS) vibikey_linux_daemon.o vibikey_linux_dialog.o
 
 $(TARGET): $(LINUX_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 	@echo "Built $(TARGET) for Linux"
 
 # Windows objects (MinGW)
-WIN_OBJS = main.o $(COMMON_OBJS) catkey_windows_hook.o catkey_windows_dialog.o
+WIN_OBJS = main.o $(COMMON_OBJS) vibikey_windows_hook.o vibikey_windows_dialog.o
 
 $(TARGET).exe: $(WIN_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^
 	@echo "Built $(TARGET).exe for Windows (MinGW)"
 
 # Windows objects (MSVC)
-WIN_MSVC_OBJS = main.obj config.obj vietnamese_tep.obj catkey_input_method_dialog.obj catkey_windows_hook.obj catkey_windows_dialog.obj
+WIN_MSVC_OBJS = main.obj config.obj vietnamese_tep.obj vibikey_input_method_dialog.obj vibikey_windows_hook.obj vibikey_windows_dialog.obj
 
 $(TARGET)_msvc.exe: $(WIN_MSVC_OBJS)
 	$(CC) $(LDFLAGS) /Fe:$@ $^
@@ -126,7 +126,7 @@ $(TARGET)_msvc.exe: $(WIN_MSVC_OBJS)
 # Test
 # ============================================================================
 
-test: CFLAGS += -DCATKEY_TEST
+test: CFLAGS += -DVIBIKEY_TEST
 test: linux
 	./$(TARGET)
 

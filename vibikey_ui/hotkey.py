@@ -1,5 +1,5 @@
 """
-CatKey - global hotkey listener using pynput.
+VibiKey - global hotkey listener using pynput.
 
 Runs a background keyboard listener and fires a callback when the configured
 toggle combo is pressed (default Ctrl+Shift). Works system-wide, independent

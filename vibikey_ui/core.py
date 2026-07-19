@@ -1,5 +1,5 @@
 """
-CatKey - Python binding to the C core (catkey_core.dll / libcatkey_core.so)
+VibiKey - Python binding to the C core (vibikey_core.dll / libvibikey_core.so)
 
 All Vietnamese conversion is done in the C/C++ core. This module only
 loads the shared library and marshals strings across the ABI. If the
@@ -26,15 +26,15 @@ def _data_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-_CORE_DIR = _data_root() / "catkey_core"
+_CORE_DIR = _data_root() / "vibikey_core"
 
 
 def _lib_names():
     if sys.platform == "win32":
-        return ["catkey_core.dll"]
+        return ["vibikey_core.dll"]
     if sys.platform == "darwin":
-        return ["libcatkey_core.dylib"]
-    return ["libcatkey_core.so"]
+        return ["libvibikey_core.dylib"]
+    return ["libvibikey_core.so"]
 
 
 _HAS_HOOK = False
@@ -42,19 +42,19 @@ _HAS_HOOK = False
 
 def _bind(lib):
     global _HAS_HOOK
-    lib.catkey_convert_word.argtypes = [
+    lib.vibikey_convert_word.argtypes = [
         ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int,
     ]
-    lib.catkey_convert_word.restype = ctypes.c_int
+    lib.vibikey_convert_word.restype = ctypes.c_int
     # Optional system-wide hook engine (Windows only).
     try:
-        lib.catkey_start.restype = ctypes.c_int
-        lib.catkey_stop.restype = None
-        lib.catkey_set_enabled.argtypes = [ctypes.c_int]
-        lib.catkey_get_enabled.restype = ctypes.c_int
-        lib.catkey_set_method.argtypes = [ctypes.c_int]
-        lib.catkey_set_toggle_key.argtypes = [ctypes.c_int, ctypes.c_int]
-        lib.catkey_is_running.restype = ctypes.c_int
+        lib.vibikey_start.restype = ctypes.c_int
+        lib.vibikey_stop.restype = None
+        lib.vibikey_set_enabled.argtypes = [ctypes.c_int]
+        lib.vibikey_get_enabled.restype = ctypes.c_int
+        lib.vibikey_set_method.argtypes = [ctypes.c_int]
+        lib.vibikey_set_toggle_key.argtypes = [ctypes.c_int, ctypes.c_int]
+        lib.vibikey_is_running.restype = ctypes.c_int
         _HAS_HOOK = True
     except AttributeError:
         _HAS_HOOK = False
@@ -62,15 +62,15 @@ def _bind(lib):
 
 
 def _try_build():
-    """Best-effort build of the core lib so CatKey works out of the box."""
+    """Best-effort build of the core lib so VibiKey works out of the box."""
     import subprocess
     src = _CORE_DIR / "vietnamese_tep.c"
-    hook = _CORE_DIR / "windows" / "catkey_hook.c"
+    hook = _CORE_DIR / "windows" / "vibikey_hook.c"
     if not src.exists():
         return
     if sys.platform == "win32":
-        out = _CORE_DIR / "catkey_core.dll"
-        deff = _CORE_DIR / "catkey_core.def"
+        out = _CORE_DIR / "vibikey_core.dll"
+        deff = _CORE_DIR / "vibikey_core.def"
         srcs = [str(src)]
         if hook.exists():
             srcs.append(str(hook))
@@ -108,7 +108,7 @@ def _try_build():
             except (OSError, subprocess.SubprocessError):
                 pass
     else:
-        out = _CORE_DIR / "libcatkey_core.so"
+        out = _CORE_DIR / "libvibikey_core.so"
         for cc in ("cc", "gcc", "clang"):
             try:
                 subprocess.run(
@@ -154,7 +154,7 @@ def convert_word(word: str, method: str) -> str:
         return word
     m = _METHOD_VNI if method == "vni" else _METHOD_TEIP
     buf = ctypes.create_string_buffer(_MAX_OUTPUT)
-    n = _LIB.catkey_convert_word(word.encode("utf-8"), buf, _MAX_OUTPUT, m)
+    n = _LIB.vibikey_convert_word(word.encode("utf-8"), buf, _MAX_OUTPUT, m)
     if n <= 0:
         return word
     return buf.raw[:n].decode("utf-8", errors="replace")
@@ -170,30 +170,30 @@ def hook_available() -> bool:
 def hook_start() -> bool:
     if not hook_available():
         return False
-    return bool(_LIB.catkey_start())
+    return bool(_LIB.vibikey_start())
 
 
 def hook_stop() -> None:
     if hook_available():
-        _LIB.catkey_stop()
+        _LIB.vibikey_stop()
 
 
 def hook_set_enabled(on: bool) -> None:
     if hook_available():
-        _LIB.catkey_set_enabled(1 if on else 0)
+        _LIB.vibikey_set_enabled(1 if on else 0)
 
 
 def hook_set_method(method: str) -> None:
     if hook_available():
-        _LIB.catkey_set_method(_METHOD_VNI if method == "vni" else _METHOD_TEIP)
+        _LIB.vibikey_set_method(_METHOD_VNI if method == "vni" else _METHOD_TEIP)
 
 
 def hook_is_running() -> bool:
-    return hook_available() and bool(_LIB.catkey_is_running())
+    return hook_available() and bool(_LIB.vibikey_is_running())
 
 
 def hook_get_enabled() -> bool:
-    return hook_available() and bool(_LIB.catkey_get_enabled())
+    return hook_available() and bool(_LIB.vibikey_get_enabled())
 
 
 # Modifier mask bits for the toggle hotkey
@@ -205,4 +205,4 @@ MOD_ALT = 4
 def hook_set_toggle_key(vk: int, mods: int) -> None:
     """Set the global VN/EN toggle hotkey. vk=0 => modifiers-only combo."""
     if hook_available():
-        _LIB.catkey_set_toggle_key(int(vk), int(mods))
+        _LIB.vibikey_set_toggle_key(int(vk), int(mods))

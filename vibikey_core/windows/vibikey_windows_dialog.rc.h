@@ -1,9 +1,9 @@
 /*
- * CatKey - Vietnamese Input Method
+ * VibiKey - Vietnamese Input Method
  * Windows Dialog Resource Definitions
  */
 
-#if defined(CATKEY_WINDOWS)
+#if defined(VIBIKEY_WINDOWS)
 
 #define IDC_METHOD_LIST    1001
 #define IDC_STATUS_TEXT    1002
@@ -20,9 +20,9 @@ static const DLGTEMPLATE g_method_dialog_template = {
     300, 200,  /* width, height */
     0,  /* menu */
     0,  /* class */
-    L"CatKey Input Method",  /* title */
+    L"VibiKey Input Method",  /* title */
     8,  /* font size */
     L"MS Shell Dlg"  /* font */
 };
 
-#endif /* CATKEY_WINDOWS */
+#endif /* VIBIKEY_WINDOWS */

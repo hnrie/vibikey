@@ -1,7 +1,7 @@
 """
-CatKey - interface translation via gettext.
+VibiKey - interface translation via gettext.
 
-Uses standard .po/.mo catalogs in locales/<lang>/LC_MESSAGES/catkey.mo
+Uses standard .po/.mo catalogs in locales/<lang>/LC_MESSAGES/vibikey.mo
 (editable with Poedit). English is the source language: msgid strings are the
 English text, so English needs no catalog (msgid is returned as-is).
 
@@ -30,7 +30,7 @@ def _data_root() -> Path:
 
 
 _LOCALE_DIR = _data_root() / "locales"
-_DOMAIN = "catkey"
+_DOMAIN = "vibikey"
 
 _current = LANG_EN
 _translation = gettext.NullTranslations()
